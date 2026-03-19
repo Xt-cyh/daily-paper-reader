@@ -1,0 +1,224 @@
+Title: Modeling Sequential Design Actions as Designer Externalization on an Infinite Canvas
+
+URL Source: https://arxiv.org/pdf/2603.11569v1
+
+Published Time: Fri, 13 Mar 2026 00:35:28 GMT
+
+Number of Pages: 8
+
+Markdown Content:
+# Modeling Sequential Design Actions as Designer Externalization on an Infinite Canvas 
+
+# Yejin Yun ∗
+
+Design Informatics Lab, Interior Architecture Design Hanyang University Seoul, Republic of Korea Human-Centered AI Design Institute Hanyang University Seoul, Republic of Korea carryy0823@gmail.com 
+
+# Seung Won Lee ∗
+
+Design Informatics Lab, Interior Architecture Design Hanyang University Seoul, Republic of Korea Human-Centered AI Design Institute Hanyang University Seoul, Republic of Korea lswgood0901@gmail.com 
+
+# Jiin Choi ∗
+
+Design Informatics Lab, Interior Architecture Design Hanyang University Seoul, Republic of Korea Human-Centered AI Design Institute Hanyang University Seoul, Republic of Korea jiin4900@gmail.com 
+
+# Kyung Hoon Hyun †
+
+Design Informatics Lab, Interior Architecture Design Hanyang University Seoul, Republic of Korea Human-Centered AI Design Institute Hanyang University Seoul, Republic of Korea hoonhello@gmail.com 
+
+## Abstract 
+
+Infinite canvas platforms are becoming central to contemporary design practice, enabling designers to externalize cognition through the spatial arrangement of multimodal artifacts. As AI agents in-creasingly generate and organize content within these environ-ments, their impact on designers’ externalization processes remains underexplored. We report a field study with eight professional de-signers comparing workflows with and without an AI organizing agent. Through a sequence analysis of 5,838 design actions, we identify three key shifts: (1) AI integration reallocates cognitive effort from spatial management to content curation and relational structuring, without increasing active time; (2) a characteristic generate-and-curate cycle emerges in which designers’ demands on the agent intensify while the agent’s functional role adapts; and (3) AI’s role evolves from a divergent catalyst in early stages to a convergent curator in later phases. These findings offer a be-havioral model for designing phase-adaptive AI tools that support human–AI co-evolution on infinite canvases. 
+
+## CCS Concepts 
+
+• Human-centered computing → Empirical studies in HCI ; In-teraction design process and methods ; • Computing method-ologies → Artificial intelligence . 
+
+> ∗Co-first authors
+> †Corresponding author.
+> This work is licensed under a Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
+> CHI EA ’26, Barcelona, Spain
+> ©2026 Copyright held by the owner/author(s). ACM ISBN 979-8-4007-2281-3/2026/04 https://doi.org/10.1145/3772363.3799044
+
+## Keywords 
+
+Infinite canvas, Sequential action analysis, Deployment study, Agen-tic AI 
+
+ACM Reference Format: 
+
+Yejin Yun, Seung Won Lee, Jiin Choi, and Kyung Hoon Hyun. 2026. Modeling Sequential Design Actions as Designer Externalization on an Infinite Canvas . In Extended Abstracts of the 2026 CHI Conference on Human Factors in Computing Systems (CHI EA ’26), April 13–17, 2026, Barcelona, Spain. ACM, New York, NY, USA, 8 pages. https://doi.org/10.1145/3772363.3799044 
+
+## 1 Introduction 
+
+Contemporary design practice is progressively migrating toward infinite canvas platforms. An infinite canvas is a boundless digital workspace where designers externalize their thinking by collect-ing multimodal artifacts—notes, images, and drawings—and con-structing semantic connections through spatial arrangement[ 7 , 12 ]. Unlike linear tools, these environments capture design reasoning through the spatial configuration of artifacts, producing “cognitive traces” that reveal how designers navigate from uncertainty toward solutions[ 4 ]. The inspirational materials, structured compositions, and connectors left on the infinite canvas are not mere byprod-ucts but continuous records of sensemaking[ 1, 11 , 20 ], enabling designers to revisit, revise, reconfigure, and reflect upon evolving ideas. Despite the potential of infinite canvases for observing de-sign cognition, prior work has mainly evaluated usability or final outcomes, leaving process-level accounts relatively limited[ 6 , 7]. In AI-assisted design, systems have begun to support the collection and organization of sticky notes (or similar externalizations[ 3 , 5]), yet log-based evidence on how such support shapes in-canvas be-havior, such as action sequences or loops and phase transitions from ideation to organization and elaboration, remains scarce. This gap is widening with AI organizing agents that automatically clus-ter artifacts[ 5, 18 ] and generate contextual content[ 7, 12 ], but how  
+
+> arXiv:2603.11569v1 [cs.HC] 12 Mar 2026 CHI EA ’26, April 13–17, 2026, Barcelona, Spain Yejin Yun, Seung Won Lee, Jiin Choi, and Kyung Hoon Hyun
+
+Figure 1: Infinite-canvas workspace used in the study. Designers externalize ideas by collecting, spatially arranging, and connecting multimodal artifacts (e.g., images, notes, connectors). Both Baseline and Agent organizer conditions support prompt generation and image editing within the canvas. 
+
+these agents alter temporal rhythms, behavioral sequences, and phase-specific strategies is still not well understood. To address this gap, we conducted a field study with eight pro-fessional designers, comparing workflow patterns across two condi-tions with and without an AI organizing agent. In both conditions, designers developed ideas by collecting and accumulating multi-modal artifacts on the infinite canvas, spatially arranging them, and establishing connections. To systematically identify how the AI organizing agent affects designers’ externalization processes, we formulated three research questions: 
+
+• RQ1. How does the AI organizing agent reconfigure the tem-poral structure and action distribution of design workflows? 
+
+• RQ2. What new sequential design loops emerge during AI collaboration, and how do they replace existing spatial man-agement practices? 
+
+• RQ3. How does the AI organizing agent’s role evolve across design process stages (early, mid, and late)? To address these questions, we developed a Sequential Design Action Taxonomy that maps raw interaction logs to semantically meaningful design action types. This taxonomy provides the analyt-ical foundation for systematically examining workflow dynamics and answering each research question. We summarize our contributions as follows. First, we propose an externalization-centered behavioral model for infinite canvases. We conceptualize designers’ externalization as observ-able action primitives over multimodal artifacts, enabling computa-tional models of how thinking becomes spatial representation. Sec-ond, we introduce a sequence-based analysis pipeline for ex-ternalization dynamics. We build a pipeline that abstracts raw in-teraction logs into semantic action sequences, enabling quantitative comparisons across conditions and identifying discriminative se-quential patterns. Third, we present empirical findings of phase-dependent human–AI collaboration. We demonstrate that the proactive organizing agent redistributes cognitive effort from spa-tial management to content curation and relational structuring without increasing workload, and that its functional role evolves across design phases from idea amplifier to co-evolutionary struc-turing partner to convergent curator, following a non-monotonic pattern in which designers’ generation selectivity and acceptance commitment increase simultaneously. 
+
+## 2 Study Design 
+
+We conducted a field study with eight professional designers (prod-uct and space design; mean years of experience = 4.5, SD = 2.20) to examine how interaction patterns and design actions change with Agent organizer . Participants alternated between Baseline (infinite canvas for manually collecting/arranging multimodal artifacts such as text and images, with prompt generation and image editing) (Figure 1) and Agent organizer (same canvas and AI features plus an organizing agent that clusters existing artifacts and uses curated groups as visual references for generating new images)(Figure 2). Each designer completed two tasks per condition: a Space brief (Tea lounge: compact evening retreat with subdued tone, tactile comfort, and soft safety-minded details) and a Product brief (Kitchenware: everyday tools for minimal households emphasizing ergonomic clarity, durable tactility, and a restrained, cohesive material expres-sion), with task–condition order counterbalanced across partici-pants. Timestamped interaction logs were collected for analysis; event types and preprocessing are described in the Supplementary Material. 
+
+## 3 Sequential Design Action Classification Framework 
+
+After preprocessing 14,075 raw interaction events with a rule-based Event Log Abstraction (ELA) pipeline—removing operational noise and aggregating micro-events into 5,838 analyzable Design Actions ,we developed a computational framework that classifies these ac-tions into a hierarchical taxonomy. The taxonomy distinguishes state-based inference from explicit system events and comprises 11 broad categories ( Create, Elaborate, Relocate, Relate, Structure, Prune, Interact, AgentGen, PromptGen, ImageEdit, IntentEdit ), seven artifact types (note, image, drawing, table, column, to-do list, and connector) , and 37 or more specific action types. The classification Modeling Sequential Design Actions as Designer Externalization on an Infinite Canvas CHI EA ’26, April 13–17, 2026, Barcelona, Spain 
+
+Figure 2: Workflow of the Agent organizer condition. The AI organizing agent observes designers’ artifact collections on the canvas, forms semantically coherent clusters, and leverages these clusters as implicit prompts for subsequent image generation. Table 1: Hierarchical design action taxonomy with 11 broad categories, seven artifact types, and representative action examples. Categories are derived through state-based inference (Create–Interact) or explicit system events (AgentGen–IntentEdit).                                          
+
+> Category Meaning Artifact type Example actions
+> Create Creating a new artifact All Create_inspiration ,Create_inspiration_agent ,
+> Create_structure_column
+> Elaborate Refining content All Elaborate_inspiration_micro
+> Relocate Spatial repositioning All Relocate_inspiration_micro ,Relocate_structure_large
+> Relate Connector management Relation Relate
+> Structure Hierarchy organization Container Structure
+> Prune Deleting artifacts All Prune_inspiration ,Prune_structure
+> Interact Social engagement Comments, reactions Interact_comment_create ,Interact_reaction
+> AgentGen AI agent organizing/generation Agent Agent_gen
+> PromptGen User prompt generation AI mode Prompt_gen
+> ImageEdit AI in editing Image Image_edit
+> IntentEdit Aligning design intent Intent Intent_edit_global ,Intent_edit_local
+
+pipeline (Figure 1) processes each timestamped event through three sequential stages. 
+
+Stage 1: Change detection. In this stage, the system detects technical-level state changes by comparing each artifact instance’s current state (S t) with its previous state (S t-1 ). Specifically, six types of deltas are extracted: (1) instance appearance or removal, (2) character-level changes in text content ( Δchar ), (3) size changes in visual elements ( Δsize : width/height), (4) position changes measured by Euclidean distance ( Δpos ), (5) increases in social signals (reaction counts, comments), (6) modifications in relationship endpoints and hierarchical container (startId/endId, child ID changes). These low-level primitives purely quantify state differences without semantic interpretation. Full delta definitions and details are provided in the Supplementary Material, Section A.2. 
+
+Stage 2: Hierarchical Taxonomy mapping. We employed a hybrid classification strategy to derive 11 broad action categories. Seven categories ( Create, Elaborate, Relocate, Relate, Structure, Prune, Interact ) are inferred by analyzing geometric and semantic deltas between artifact states. Four AI-mediated categories ( AgentGen, PromptGen, ImageEdit, IntentEdit ) are identified directly from sys-tem task codes and metadata logs. To ensure consistent categorization across heterogeneous ob-jects, we standardized artifacts into four groups: Inspiration (images, notes, drawings, agent-generated images), Container (columns, ta-bles), Control (to-do lists), and Relation (connectors). Each detected event is mapped to one broad category and a specific action subtype. Create captures new artifact instances and functions as an anchoring operation; Elaborate captures content re-finement through character-level text edits; Relocate captures spatial repositioning discretized by magnitude; Relate manages connectors including creation, reconnection, and attribute changes; Structure 
+
+organizes hierarchical containers; Prune removes artifacts or struc-tures; and Interact tracks artifact level interaction (e.g., reactions and comments). AI-mediated categories are derived from explicit system logs, with AgentGen occurring only in the Agent organizer 
+
+condition. CHI EA ’26, April 13–17, 2026, Barcelona, Spain Yejin Yun, Seung Won Lee, Jiin Choi, and Kyung Hoon Hyun 
+
+Figure 3: Comparative analysis of design action distributions and statistical significance between Baseline and Agent organizer 
+
+conditions. Left: Percentage distribution of 11 design actions across conditions. Right: Z-scores indicating statistically significant changes in action frequency, highlighting decreases in Relocate and increases in AgentGen and Relate. 
+
+## 4 Results and Discussion 4.1 Design Workflow Redistribution Without Increased Effort (RQ1) 
+
+Total active time did not differ between conditions (Baseline: 𝑀 =
+
+3.73 h, 𝑆𝐷 = 1.75 ; Agent organizer : 𝑀 = 4.03 h, 𝑆𝐷 = 2.13 ; Wilcoxon signed rank 𝑊 = 16 .0, 𝑝 = .84 ). However, action distribution changed substantially ( 𝜒 2 (10 , 𝑁 = 5,838 ) = 269 .59 , 𝑝 < .001 ,Cramer’s 𝑉 = 0.215 ). The most pronounced shift occurred in Re-locate , which dropped from 47 .11% to 36 .11% , a reduction of 11 .0
+
+percentage points that corresponded to the increase in AgentGen 
+
+(5.84% ). Sensitivity analysis excluding AgentGen confirmed that the redistribution remained significant ( 𝜒 2 (9, 𝑁 = 5,693 ) = 69 .50 ,
+
+𝑝 < .001 ), indicating that the agent did not simply add new actions but restructured how designers allocated their effort (Figure 3). No-tably, a significant redistribution target was Relate , which rose from 
+
+9.45% (Baseline) to 13 .41% (Agent organizer ; 𝑍 = +4.75 , 𝑝 < .001 ), indicating that designers in the Agent organizer condition spent pro-portionally more effort establishing semantic relationships between artifacts. This pattern constant engagement with redistributed activity aligns with Shneiderman’s Human-Centered AI framework, which distinguishes augmentation that amplifies human capabilities from automation that replaces human effort[ 15 ]. The agent did not re-duce designers’ cognitive investment; it redirected that investment toward different types of design work. Interview accounts corrob-orated this pattern: designers described baseline workflows as re-quiring substantial manual effort for basic grouping (P4: “planning from a blank slate”), whereas agent-mediated clustering absorbed much of this overhead (P6), freeing capacity that was redirected toward relational structuring. This result suggests that proactive AI intervention reshape what designers do rather than how much they do—a form of strategic transformation that the following sections discuss in detail. 
+
+## 4.2 Sequential design action mining, From Spatial Management Overhead to Creative Flow: Shift in Collaborative Loops (RQ2) 
+
+In the Baseline condition, “Spatial management overhead” domi-nated the workflow: The Relocate → Relocate self-loop accounted for 29 .05% of all Baseline bigrams, significantly exceeding the Agent organizer condition ( 18 .98% , 𝑍 = −8.80 , 𝑝 < .001 ). This domi-nance extended to the trigram level, where Relocate appeared in six of the eight trigram patterns before a non-Relocate chain, Relate 
+
+→ Relate → Relate , emerged at Rank 9 ( 2.04% ). In the Agent organizer 
+
+condition, designers were freed from this overhead: Relate → Relate 
+
+→ Relate rose to Rank 3 ( 2.88% ), immediately following the two self-repetition patterns common to both conditions ( Relocate ×3 and 
+
+Create ×3). The Relocate ×3 trigram itself declined from 20 .85% to 
+
+12 .76% , a relative reduction of 38 .80% , indicating that the agent created sequential room for sustained relational work that spa-tial coordination had previously occupied. This freed capacity was partly absorbed by new AI-mediated loops: AgentGen → Create 
+
+and AgentGen → AgentGen entered the top 10 bigrams (Rank 9 and 10, respectively), patterns entirely absent in the Baseline condition. Designers confirmed this shift qualitatively: Several reported that agent support changed their entry point from manual key-word derivation to reference-driven exploration (P1, P2), and others strategically adjusted their recording practices to influence down-stream agent behavior. For instance, becoming more deliberate about which records to upload (“thinking about what the agent would see,” P5). Zhou et al. identified a tension between linear command-execution AI workflows and the nonlinear nature of creative design [ 19 ]. Both conditions in our study included AI generation tools, but only Agent organizer introduced proactive intervention, that is, clustering artifacts and generating contextual content without explicit user commands. Our findings suggest that this proactive engagement absorbed spatial management overhead, creating cognitive room Modeling Sequential Design Actions as Designer Externalization on an Infinite Canvas CHI EA ’26, April 13–17, 2026, Barcelona, Spain 
+
+Figure 4: Temporal evolution of design actions across Early, Mid, and Late phases Agent organizer vs. Baseline. Heatmaps show the percentage distribution of top design actions over time, revealing reduced Relocate activity and increased content creation and relational structuring in the agent condition. 
+
+for designers to evaluate content and align design intent rather than coordinate artifact placement. 
+
+## 4.3 Phase-Dependent Evolution of Agent Partnership (RQ3) 
+
+Sequential design behavior patterns within each phase, analyzed through first-order Markov chains, revealed a distinct evolution in the AI organizing agent’s roles. The reduction in spatial manage-ment overhead described in Section 4.2 was not evenly distributed across phases of the design timeline. 𝑃 (Relocate |Relocate ) in the Baseline remained consistently high across all phases ( 61 .51% →
+
+68 .85% → 58 .89% ), whereas the Agent organizer condition showed substantially lower values ( 49 .89% → 52 .55% → 58 .44% ), with the gap narrowing progressively from an 11.62 percentage-point difference in the Early phase to near convergence in the Late phase. This narrowing gap suggests that the agent’s contribution shifted over time; the capacity it freed was not always directed toward the same activities. Phase-level transition and action-rank analyses re-vealed three distinct roles the agent assumed as the design process unfolded. 
+
+Early phase, Idea Amplifier. The Early phase was characterized by the agent functioning as a catalyst for divergent exploration. This aligns with research on divergent ideation through parallel proto-typing [ 10 ]. The self-transition probability 𝑃 (AgentGen |AgentGen )
+
+was 33 .33% , the lowest across phases, whereas 𝑃 (Create |AgentGen )
+
+(i.e., AgentGen → Create ) reached 55 .56% , the highest. Rather than sustaining iterative generation, the agent’s outputs rapidly trig-gered new artifact placement. Detailed action-level analysis re-vealed that 60 .00% of placements were agent-generated images accepted directly, whereas 40 .00% involved designers sourcing their own artifacts after bypassing the agent’s suggestion, the highest rate of independent sourcing across all phases. This influx of new material coincided with shifts in activity patterns: Relate increased from 7.87% in the Baseline condition to 9.10% in Agent organizer , and 
+
+Elaborate increased from 4.92% to 6.61% , rising from Rank 6 to Rank 4. Notably, Prune , which was ranked fourth in the Baseline condition, dropped to Rank 6 in the Agent organizer condition, in-dicating that Elaborate replaced Prune at this position. Elaborate 
+
+reached its highest proportion in this phase, suggesting that de-signers used the initial wave of agent-generated and self-sourced raw material for content refinement. The agent’s proposals enabled designers to populate the canvas with diverse artifacts and begin refining individual elements. Consistent with this catalytic role, one designer contrasted agent-generated “unexpected, refreshing surprises” with baseline outcomes that “came out exactly as initially intended” (P2), and another reported that agent support provided directional scaffolding even in an unfamiliar design domain (P1). 
+
+Mid phase, Co-evolutionary Structuring. In the Mid phase, the self-transition probability 𝑃 (AgentGen |AgentGen ) increased sharply to 
+
+41 .89% (Rank 1), indicating that designers engaged in more sus-tained generation cycles, requesting multiple alternatives before selecting. However, 𝑃 (Create |AgentGen ) dropped to 37 .84% , the lowest value across phases, revealing that designers became more se-lective about which outputs reached the canvas. Despite this lower placement rate, the acceptance ratio (i.e., the proportion of agent-generated outputs accepted and placed as Create_inspiration_agent) rose to 89 .29% , demonstrating a transition from designer-initiated to agent-mediated artifact addition—an alignment suggesting that the agent’s solutions have synchronized with the designers’ evolv-ing problem definition [ 9 ]. This selectivity was accompanied by a marked increase in relational organization: Relate as a standalone action rose from 9.10% (Early) to 14 .83% , and the Relate → Relate 
+
+bigram doubled from 3.33% (Rank 7) to 6.39% (Rank 4), indicating sustained relational chaining. These patterns suggest that Mid-phase designers shifted their cognitive focus from idea generation to emerging organizational structure, demanding more alternatives from the agent while selectively integrating only those that fit an emerging organizational structure. Accordingly, the agent’s role shifted from an inspiration catalyst to relational structuring part-ner [8]. 
+
+Late phase, Convergent Curation. The Late phase was defined by convergent integration and curation. The self-transition probability CHI EA ’26, April 13–17, 2026, Barcelona, Spain Yejin Yun, Seung Won Lee, Jiin Choi, and Kyung Hoon Hyun 
+
+𝑃 (AgentGen |AgentGen ) reached its peak at 43 .14% (Rank 2), reflect-ing the most intensive iterative generation. 𝑃 (Create |AgentGen )
+
+rebounded to 45 .10% (Rank 1), completing a U-shaped trajectory (55 .56% → 37 .84% → 45 .10% ), and the acceptance rate climbed to 
+
+95 .65% , indicating near-complete reliance on agent-generated arti-facts for canvas additions. The proportion of Create as a standalone action reached its lowest level across phases ( 27 .02% → 21 .99% →
+
+21 .25% ), further confirming the shift from designer-initiated to agent-mediated content creation. At the same time, Relate peaked at 15 .24% , and the Relate → Relate bigram reached 7.20% (Rank 2, the highest across phases), signaling intensive consolidation of ar-tifact relationships. Together, these patterns suggest that the Late phase was characterized by convergent curation: Designers lever-aged the agent for targeted content generation with near-universal acceptance, while simultaneously intensifying relational connec-tions to stabilize their design vision. Designers’ reflections echoed this convergent pattern: P5 evaluated agent-condition outcomes as simultaneously more aligned with client requirements and more creatively distinctive than baseline results, despite initially perceiv-ing agent suggestions as overly directive. 
+
+## 5 Conclusion and Limitation 
+
+This paper presents a sequence-based behavioral model of design externalization on infinite canvases. Through analysis of 5,838 de-sign actions, we demonstrated three key findings. Agent organizer 
+
+reallocated cognitive effort from spatial management to content curation and relational structuring without increasing active time, indicating strategic redistribution rather than added workload. Sec-ond, the agent’s role evolved across a three-phase trajectory: as an inspirational catalyst whose proposals stimulated canvas pop-ulation and also increased Elaborate and Relate activity (Early), a co-evolutionary structuring partner where designers demanded more alternatives yet curated selectively while doubling relational work (Mid), and a convergent curator where near-universal accep-tance and peak relational chaining consolidated the design vision (Late). The U-shaped 𝑃 (Create |AgentGen ) pattern and the progres-sive acceptance shift reveal that human–AI collaboration on infinite canvases is non-monotonic: Designers develop increasing selectiv-ity in their requests to the agent, while increasing trust in what they ultimately accept, a behavioral tension resolved by the agent’s shifting role from idea amplifier to selective curator. These findings suggest that the value of generative AI in infinite canvas environments lies not in automation but in phase-adaptive, bidirectional collaboration. This phase-dependent evolution demon-strates that AI agents function as dynamic partners adapting to designers’ stage-specific needs rather than uniform tools, where designers’ multimodal archiving behavior functions as implicit prompts, reducing reliance on explicit commands. Accordingly, future AI canvas systems should align their affordances with this evolving cognitive rhythm: supporting inspirational breadth during early exploration, selective scaffolding during mid-phase structur-ing, and convergent integration during late-phase curation. In this sense, proactive AI should be understood not as a substitute for human agency, but as a mechanism for redistributing cognitive effort across phases of design. Although these patterns were de-rived from a study with eight designers, limiting generalizability, they offer a foundation for validating phase-dependent human–AI collaboration models across larger samples and broader design domains. 
+
+## Acknowledgments 
+
+This work was supported by the Technology Innovation Program (RS-2025-02317326, Development of AI-Driven Design Generation Technology Based on Designer Intent) funded by the Ministry of Trade, Industry & Energy (MOTIE, Korea). 
+
+## A Details of Sequential Design Action Classification Framework A.1 Data Collection and Preprocessing 
+
+We analyzed designers’ processes by abstracting raw interaction logs into high-level Design Actions using a rule-based Event Log Ab-straction (ELA) approach[ 2, 13 , 16 , 17 ]. Adopting an artifact-centric perspective[ 13 , 17 ], we tracked each artifact’s lifecycle from cre-ation through elaboration, relocation, and deletion to connect low-level events to higher-level design strategies. The abstraction re-moved operational noise and merged micro-events into discrete ac-tions using time-based aggregation rules and artifact state changes. Our pipeline processed a total of 14,075 low-level events. In Step 1 (Event Cleaning), 6,782 events (48.2%) were excluded, yielding 7,293 clean events. Exclusions comprised out-of-scope protocol violations and interview-date-related records (588), system noise such as auto-saves and internal updates (3,495), redundant duplicates and no-change logs (2,076), typing consolidation (460), and post-delete reappearing artifacts (163). In Step 2 (Action Extraction), we applied the design action tax-onomy to the remaining 7,293 events and filtered out 1,455 events without design significance, resulting in 5,838 analyzable Design Actions [ 2, 16 ]. This refinement reflects corrections to previously misclassified categories (e.g., Elaborate, ImageEdit, and IntentEdit ), leading to a stricter definition of meaningful design activity. In total, 8,237 events (58.5%) were excluded across both stages. 
+
+## A.2 Action Magnitude Quantification Thresholds 
+
+Building on the deltas extracted in Stage 1 (Change Detection; Sec-tion 3), we quantified action magnitude using pilot-derived thresh-olds. Each continuous-valued action was classified into four magni-tude levels based on data-driven quartile boundaries ( 𝑄 1, 𝑄 2, 𝑄 3) of the pooled empirical distribution. For Relocate actions ( 𝑁 = 3,168 ), Euclidean displacement was partitioned at 𝑄 1 = 87 px, 𝑄 2 = 302 px, and 𝑄 3 = 871 px, yielding four levels: Micro ( ≤ 87 px; fine posi-tional adjustments), Small ( 88 –302 px), Medium ( 303 –871 px), and Large ( > 871 px; substantial reorganization). For Elaborate text actions ( 𝑁 = 196 ), character-count change ( |Δchar |) was partitioned at 𝑄 1 = 3, 𝑄 2 = 12 , and 𝑄 3 = 50 characters, yielding four levels: Micro ( ≤ 3 chars; typo-level edits), Small ( 4–12 chars), Medium (13 –50 chars), and Large ( > 50 chars; paragraph-level revisions). Modeling Sequential Design Actions as Designer Externalization on an Infinite Canvas CHI EA ’26, April 13–17, 2026, Barcelona, Spain 
+
+## A.3 Active Time and Segmentation 
+
+Because sessions spanned multiple days, we standardized active time by removing interaction gaps longer than 30 min. This cut-off is supported by the interval distribution ( 95% 3.93 min; 99% 
+
+368.06 min) and sensitivity analyses, retaining short breaks while excluding long interruptions (e.g., meals/sleep) consistent with web-analytics sessionization. Active time was 3.73 ± 1.75 h (Base-line) and 4.03 ± 2.13 h (Agent organizer ), with no condition differ-ence (Wilcoxon signed-rank 𝑊 = 16 .0, 𝑝 = 0.8438 ). We split each session into tertiles of cumulative active time—Early ( 0–33 .33% ), Mid ( 33 .34 –66 .66% ), Late ( 66 .67 –100% ). This equal-interval segmen-tation serves two purposes: First, it normalizes individual pace differences across participants with variable session durations, enabling cross-participant comparison without imposing fixed-duration phase boundaries. Second, it captures the temporal evo-lution of design strategies, reflecting the theoretically established progression from divergent exploration through structuring to con-vergent refinement in design processes [ 8 , 9]. The observed phase-specific behavioral patterns (Section 4.3) provide post-hoc evidence that the tertile boundaries captured meaningful transitions in de-sign strategy. 
+
+## A.4 Concurrent Event Handling 
+
+A single user interaction can produce multiple events at the same time—for example, when an artifact is moved and its content is modified in one operation. Because these co-occurring events are recorded in an arbitrary order, naively treating that order as ground truth would introduce directional bias into transition probability estimates. To address this, we treated all orderings of a concurrent pair as equally likely. Specifically, given a concurrent pair [A, B] flanked by a preceding action X and a following action Y, we ex-panded the sequence into two permutations—X → A → B → Y and X → B → A →—each weighted at 0.5. When an n-gram window contained multiple concurrent pairs, we enumerated all possible permutations (2 raised to the number of concurrent pairs) and as-signed each an equal weight so that their combined contribution summed to one. This permutation-based weighting was applied to n-gram pattern extraction and to the Markov transition matrices used in edge-level analysis; frequency-based analyses such as action counts relied on the original raw counts without modification. 
+
+## B Analysis Strategy 
+
+We conducted three analyses to address RQ1–RQ3 and examine workflow transformations across conditions. First, Design Workflow Redistribution Without Increased Effort (RQ1) focused on understanding the overall behavioral reconfiguration following AI organizing agent introduction and validating efficiency. We analyzed distributional differences in ac-tion categories across conditions using Pearson’s Chi-square test (𝜒 2 (df = 10 , 𝑁 = 5,838 ), 𝛼 = 0.05 ). Post-hoc analysis calculated standardized residuals for each action category to derive Z-scores. To confirm that observed distributional changes did not merely stem from task-time variations, we conducted a parallel total active time comparison by the Wilcoxon signed-rank test to verify experi-mental equivalence ( 𝑛 = 8 paired samples, two-tailed). Additionally, sensitivity analysis excluding AgentGen behaviors confirmed that the AI organizing agent’s impact represented an overall strategic shift rather than simply adding new behavior types. Second, Sequential Design Action Mining (RQ2) was per-formed to identify design behavior patterns emerging during AI organizing agent collaboration. We extracted consecutive 2–3 ac-tion sequences (bigrams and trigrams) from the complete behavioral sequence across the entire session and calculated their relative fre-quencies within each condition. To statistically compare pattern frequencies between conditions, we applied two-proportion Z-tests to each bigram and trigram, testing whether the observed pro-portion of a given pattern differed significantly between Baseline and Agent organizer . This analysis primarily focused on discovering discriminative patterns across conditions. We defined condition-specific patterns as sequences absent from Baseline’s top 10 patterns but present in Agent organizer ’s top 10 patterns. We particularly fo-cused on AI-mediated loops and self-repetition patterns involving 
+
+AgentGen and Create to analyze ’generate-and-curate’ collaboration dynamics. Third, Modeling Phase-dependent Externalization (RQ3) 
+
+was designed to identify the evolution of the AI organizing agent’s role over time. We divided workflows into tertiles of cumulative active time—Early ( 0–33 .33% ), Mid ( 33 .34 –66 .66% ), Late ( 66 .67 –
+
+100% )—to normalize pace differences and capture temporal shifts in design strategy [ 8 , 9]. Within each phase, we modeled designers’ AI-mediated externalization through three complementary analyses. (1) We computed transition probabilities using first-order Markov chains [ 14 ], representing behavioral transitions as lag-1 sequential pairs (action 𝑖 → action 𝑗 ), and calculating conditional probabilities as follows: 𝑃 (action 𝑗 | action 𝑖 ) =         
+
+> Í𝑤 (action 𝑖 →action 𝑗 )
+> Í𝑘
+> Í𝑤 (action 𝑖 →action 𝑘 )
+
+, where 𝑤 
+
+denotes the transition weights that account for concurrent events (see Section A.4 for details). Transition probabilities were calcu-lated preserving designer boundaries (i.e., excluding cross-designer transitions). (2) We computed phase-level agent-originated can-vas addition rates to measure how selectively designers integrated agent-generated outputs. This rate represents the proportion of artifacts placed on the canvas that originated from the agent (Cre-ate_inspiration_agent) among all artifacts added immediately fol-lowing AgentGen interactions, complementing the Markov transi-tion probability 𝑃 (Create | AgentGen ). (3) We tracked action-rank shifts by ordering design action categories by their relative fre-quency within each phase and comparing rank positions across conditions, thereby identifying changes in the relative prominence of each action type as the design process unfolded. 
+
+## References            
+
+> [1] Mark W. R. Anderson. 2025. W(h)ither Spatial Hypertext?. In Proceedings of the 36th ACM Conference on Hypertext and Social Media (HT ’25) . ACM, 100–112. doi:10.1145/3720553.3746683 [2] Thomas Baier, Jan Mendling, and Mathias Weske. 2014. Bridging abstraction layers in process mining. Information Systems 46 (Dec. 2014), 123–139. doi:10. 1016/j.is.2014.04.004 [3] Linden J. Ball, Bo T. Christensen, and Kim Halskov. 2021. Sticky notes as a kind of design material: How sticky notes support design cognition and design collaboration. Design Studies 76 (Sept. 2021), 101034. doi:10.1016/j.destud.2021. 101034 [4] Marit Bentvelzen, Paweł W. Woźniak, Pia S.F. Herbes, Evropi Stefanidi, and Jasmin Niess. 2022. Revisiting Reflection in HCI: Four Design Resources for Technologies that Support Reflection. Proceedings of the ACM on Interactive, Mobile, Wearable and Ubiquitous Technologies 6, 1 (March 2022), 1–27. doi:10.1145/3517233
+
+CHI EA ’26, April 13–17, 2026, Barcelona, Spain Yejin Yun, Seung Won Lee, Jiin Choi, and Kyung Hoon Hyun 
+
+[5] Pei Chen, Zhuyu Teng, Hongbo Zhang, Zhaoqu Jiang, Wenzheng Song, Yiwen Ren, Weitao You, and Lingyun Sun. 2026. stickynexus: Leveraging Sticky Note In-teractions to Improve Information Management in Artificial Intelligence-Assisted Design. Journal of Mechanical Design 148, 1 (2026), 011401. doi:10.1115/1.4068894 [6] Samuel Rhys Cox, Helena Bøjer Djernæs, and Niels van Berkel. 2025. Beyond Productivity: Rethinking the Impact of Creativity Support Tools. arXiv preprint arXiv:2505.01601 (2025). doi:10.48550/arXiv.2505.01601 [7] Gregory Croisdale, Emily Huang, John Joon Young Chung, Anhong Guo, Xu Wang, Austin Z. Henley, and Cyrus Omar. 2025. DeckFlow: Specification Decom-position on a Multimodal Generative Canvas. In 2025 IEEE Symposium on Visual Languages and Human-Centric Computing (VL/HCC) . 179–184. doi:10.1109/vl-hcc65237.2025.00027 [8] Nigel Cross. 2023. Design thinking: Understanding how designers think and work .Bloomsbury Publishing. [9] Kees Dorst and Nigel Cross. 2001. Creativity in the design process: co-evolution of problem–solution. Design studies 22, 5 (2001), 425–437. [10] Steven P Dow, Kate Heddleston, and Scott R Klemmer. 2009. The efficacy of prototyping under time constraints. In Proceedings of the seventh ACM conference on Creativity and cognition . 165–174. [11] Katerina Gorkovenko, Adam Jenkins, Kami Vaniea, and Dave Murray-Rust. 2023. Data-Enhanced design: Engaging designers in exploratory sensemaking with multimodal data. International Journal of Design 17, 3 (2023), 1–23. doi:10.57698/ v17i3.01 [12] Alicia Guo, David Ledo, George Fitzmaurice, and Fraser Anderson. 2026. Pro-tosampling: Enabling Free-Form Convergence of Sampling and Prototyping through Canvas-Driven Visual AI Generation. arXiv preprint arXiv:2601.05401 
+
+(2026). doi:10.48550/arXiv.2601.05401 [13] Felix Mannhardt, Massimiliano De Leoni, Hajo A Reijers, Wil MP Van Der Aalst, and Pieter J Toussaint. 2016. From low-level events to activities-a pattern-based approach. In International conference on business process management . Springer, 125–141. [14] Christopher McComb, Kenneth Kotovsky, and Jonathan Cagan. 2018. Capturing Human Sequence-Learning Abilities in Configuration Design Tasks through Markov Chains. (May 2018). doi:10.31224/osf.io/zetj9 [15] Ben Shneiderman. 2020. Human-centered artificial intelligence: Reliable, safe & trustworthy. International Journal of Human–Computer Interaction 36, 6 (2020), 495–504. [16] R. M. E. Ruud van Cruchten and H. Hans Weigand. 2018. Process mining in logistics: The need for rule-based data abstraction. In 2018 12th International Conference on Research Challenges in Information Science (RCIS) . IEEE, 1–9. doi:10. 1109/rcis.2018.8406653 [17] Sebastiaan J van Zelst, Felix Mannhardt, Massimiliano de Leoni, and Agnes Koschmider. 2021. Event abstraction in process mining: literature review and taxonomy. Granular Computing 6, 3 (2021), 719–736. [18] Bhada Yun, Dana Feng, Ace S. Chen, Afshin Nikzad, and Niloufar Salehi. 2025. Generative AI in Knowledge Work: Design Implications for Data Navigation and Decision-Making. In Proceedings of the 2025 CHI Conference on Human Factors in Computing Systems (CHI ’25) . ACM, 1–19. doi:10.1145/3706598.3713337 [19] Jiayi Zhou, Renzhong Li, Junxiu Tang, Tan Tang, Haotian Li, Weiwei Cui, and Yingcai Wu. 2024. Understanding nonlinear collaboration between human and AI agents: A co-design framework for creative design. In Proceedings of the 2024 CHI conference on human factors in computing systems . 1–16. [20] Siyi Zhu, Robert Haisfield, Brendan Langen, and Joel Chan. 2024. Patterns of Hypertext-Augmented Sensemaking. In Proceedings of the 37th Annual ACM Symposium on User Interface Software and Technology (UIST ’24) . ACM, 1–17. doi:10.1145/3654777.3676338

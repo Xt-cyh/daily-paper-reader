@@ -1,0 +1,1185 @@
+Title: CangjieBench: Benchmarking LLMs on a Low-Resource General-Purpose Programming Language
+
+URL Source: https://arxiv.org/pdf/2603.14501v1
+
+Published Time: Tue, 17 Mar 2026 06:25:54 GMT
+
+Number of Pages: 26
+
+Markdown Content:
+# CANGJIE BENCH : Benchmarking LLMs on a Low-Resource General-Purpose Programming Language 
+
+Junhang Cheng 1, Fang Liu 1*, Jia Li 2, Chengru Wu 1,Nanxiang Jiang 1, Li Zhang 1
+
+> 1
+
+Beihang University, 2Wuhan University 
+
+chengjunhang7@gmail.com , fangliu@buaa.edu.cn 
+
+Abstract 
+
+Large Language Models excel in high-resource programming languages but struggle with low-resource ones. Existing research related to low-resource programming languages primarily fo-cuses on Domain-Specific Languages (DSLs), leaving general-purpose languages that suf-fer from data scarcity underexplored. To ad-dress this gap, we introduce C ANGJIE BENCH ,a contamination-free benchmark for Cangjie, a representative low-resource general-purpose language. The benchmark comprises 248 high-quality samples manually translated from Hu-manEval and ClassEval, covering both Text-to-Code and Code-to-Code tasks. We conduct a systematic evaluation of diverse LLMs un-der four settings: Direct Generation, Syntax-Constrained Generation, Retrieval-Augmented Generation (RAG), and Agent. Experiments reveal that Direct Generation performs poorly, whereas Syntax-Constrained Generation offers the best trade-off between accuracy and com-putational cost. Agent achieve state-of-the-art accuracy but incur high token consump-tion. Furthermore, we observe that Code-to-Code translation often underperforms Text-to-Code generation, suggesting a negative transfer phenomenon where models overfit to the source language patterns. We hope that our work will offer valuable insights into LLM generalization to unseen and low-resource programming languages. Our code and data are available at https://github. com/cjhCoder7/CangjieBench .
+
+1 Introduction 
+
+Large Language Models (LLMs) have revolution-ized software engineering, particularly in code gen-eration and translation tasks (Zhao et al., 2025; He et al., 2025; Zhang et al., 2025; Xue et al., 2024). Models such as GPT-5 (OpenAI, 2025b) and Deepseek-V3 (Liu et al., 2024) have demon-
+
+> *Corresponding author.
+
+strated remarkable proficiency in mainstream pro-gramming languages like Python (Chen, 2021) and C++ (Chervyakov et al., 2025). However, the con-vergence of AI and Edge-Cloud collaboration de-mands next-generation languages capable of unify-ing diverse computing scenarios—from embedded devices to cloud servers—while maintaining high performance. 
+
+[Importance of Cangjie] Cangjie 1, a modern programming language developed by Huawei, has emerged to meet these challenges. Designed as the cornerstone of the HarmonyOS ecosystem 2,Cangjie features native support for all-scenario application development, integrating modern lan-guage characteristics with advanced compilation optimization and runtime performance (Huawei, 2025). As HarmonyOS expands to govern a vast ecosystem of smart devices, Cangjie is poised to become a critical language in the global software market, particularly within China. 
+
+[Motivation 1] Despite its growing industrial significance, Cangjie remains a low-resource lan-guage. Unlike Python or C++, which have billions of tokens available in open-source repositories 3,Cangjie lacks a large-scale public corpus, making it challenging for current LLMs to generate valid Cangjie code. This scarcity presents a unique op-portunity to probe the boundaries of LLM general-ization (Joel et al., 2024). 
+
+[Motivation 2] Existing low-resource program-ming language studies largely focus on Domain-Specific Languages (DSLs) such as Verilog or So-lidity (Liu et al., 2023; Peng et al., 2025). These languages are tightly coupled with specific domains (e.g. , hardware or blockchain), making it hard to distinguish whether a model fails due to a lack of 
+
+syntactic knowledge or domain expertise . In con-trast, Cangjie is a general-purpose language that 
+
+> 1https://cangjie-lang.cn/en
+> 2https://www.harmonyos.com/en/
+> 3https://github.com/
+
+1                                                                         
+
+> arXiv:2603.14501v1 [cs.SE] 15 Mar 2026 Benchmark Languages Task Focus Manual Lang. Domain Lang. Popularity
+> HumanEval (2021) Python Generation ✓✓✓General ClassEval (2023) Python Generation ✓✓✓General ClassEval-T (2025) Java, C++ Translation ✓✓✓General BIRD (2023) SQL Translation ✓✓✓Database CRust-Bench (2025) Rust Translation ✓✓✓General RTest (2025) RGeneration ×××Data TeXpert (2025) LaTeX Generation ✓✓✓Typesetting NL2Bash (2024) Bash Generation ✓✓✓Script BenchSol (2024) Solidity Generation ✓✓✓Smart Contract SolEval (2025) Solidity Generation ×××Smart Contract MultiPL-E-Lua (2023) Lua Generation ×××Script MultiPL-E-Racket (2023) Racket Generation ×××Education VerilogEval (2023) Verilog Generation ✓✓✓Hardware KernelBench (2025) CUDA Generation ✓✓✓Hardware Clever (2025) Lean Generation ✓✓✓Proof VHDL-Eval (2024) VHDL Generation ✓✓✓Hardware
+> CANGJIE BENCH Cangjie Generation + Translation ✓✓✓General
+
+Table 1: Overview of Code Benchmarks. The Popularity estimates are derived from the November 2025 data of the TIOBE Programming Community Index. 
+
+possesses algorithmic universality. Since Cangjie allows for expressing logic and algorithms with-out requiring domain knowledge, it can assess the model’s ability to generalize to general-purpose languages in low-resource settings. 
+
+[Motivation 3] Beyond generation, converting code from languages like Python to new ones like Cangjie is a key industrial need. However, most existing translation benchmarks focus on pairs of high-resource languages such as Java-Python (Ah-mad et al., 2023). Translating from a high-resource language to a low-resource one is far more challeng-ing. It requires the LLM to understand the logic in the source language and accurately map it to the syntax of a strictly constrained target language. 
+
+[Novelty of CangjieBench] To bridge this gap and facilitate research in this direction, we intro-duce CANGJIE BENCH , the first comprehensive benchmark designed for Cangjie. Due to the data scarcity, scraping sufficient high-quality code from open-source repositories is currently infeasible. Consequently, we adopt a translation-based strat-egy, manually translating the widely adopted Hu-manEval (Chen, 2021) and ClassEval (Du et al., 2023) datasets from Python to Cangjie. This ap-proach brings three advantages: ❶ Zero Contam-ination: Since the benchmark is constructed via manual translation rather than crawling existing internet data, it avoids the data leakage issues, en-suring a rigorous test of the model’s generalization capabilities rather than memorization. By selecting tasks where LLMs already demonstrate strong al-gorithmic reasoning in Python, we deliberately con-trol the logic variable to isolate syntax adaptability as the sole evaluation target. ❷ Multi-Difficulty Coverage: By combining HumanEval and ClassE-val, C ANGJIE BENCH covers a diverse spectrum of difficulty. It spans from function-level algorithmic tasks to complex class-level object-oriented pro-gramming scenarios. ❸ Dual-Task Utility: The translation process naturally yields a high-quality parallel corpus between Python and Cangjie. This enables C ANGJIE BENCH to support not only Text-to-Code generation tasks but also Code-to-Code 
+
+translation tasks. 
+
+[Exploration of Methods] Beyond establish-ing the dataset, we aim to answer a key research question: which paradigm most effectively enables LLMs to generalize to an unseen programming language without parameter updates? To this end, we conduct extensive experiments across four paradigms: ❶ Direct Generation: Evaluating the capability of SOTA LLMs in zero-shot settings. 
+
+❷ Syntax-Constrained Generation: Augment-ing prompts with expert-curated concise grammar rules to help LLM better learn Cangjie program-ming language. ❸ RAG: Leveraging external knowledge bases—including official documenta-tion and crawled Cangjie code snippets to provide in-context few-shot guidance. ❹ Agent: Utilizing 2CLI-based agents to simulate iterative development, self-learning, and self-correction processes. In summary, our main contributions are listed as follows: • We introduce C ANGJIE BENCH 4, the first high-quality benchmark for Cangjie. By manually translating existing datasets, we ensure zero con-tamination and cover diverse difficulties, ranging from simple functions to complex classes. • We propose a novel research perspective by treat-ing Cangjie as a low-resource general-purpose language. Unlike DSLs, this allows us to strictly evaluate an LLM’s ability to learn new syntax without the interference of domain knowledge. • We establish two tasks: Text-to-Code genera-tion and Code-to-Code translation. These tasks simulate real-world scenarios, such as migrating projects to the HarmonyOS ecosystem, providing a practical testbed for the community. • We conduct a comprehensive evaluation using four strategies, ranging from syntax-constrained method to RAG and Agents. Our experiments provide solid baselines and offer effective in-sights into how LLMs can master new program-ming languages with limited data. 
+
+2 Related Work 
+
+Low-Resource Language Benchmarks. Though LLMs have demonstrated exceptional performance in high-resource languages (Jimenez et al., 2023; Jain et al., 2024), they failed significantly when applied to low-resource programming languages due to the scarcity of data. Early efforts such as MultiPL-E (Cassano et al., 2023) extended the Hu-manEval (Chen, 2021) and MBPP (Austin et al., 2021) benchmarks to 18 diverse languages. How-ever, as LLMs evolve, these established bench-marks have become less discriminative. Recent works have introduced specialized benchmarks such as NL2Bash (Vo et al., 2024) for shell script-ing, SolEval (Peng et al., 2025) for Solidity smart contracts, VerilogEval (Liu et al., 2023) for hard-ware description, and others (detailed in Table 1). However, using them to evaluate the generalization capabilities of LLMs presents two specific chal-lenges: (1) Entanglement with Domain Knowl-edge: Benchmarks based on DSLs ( e.g. , Verilog, Solidity) mix evaluation with domain-specific con-straints ( e.g. , hardware logic). (2) Data Leakage  
+
+> 4The data and code are available at https://github.com/ cjhCoder7/CangjieBench
+
+Risks: Languages traditionally labeled as “low-resource” ( e.g. , Lua, R; see Table 1) still exist in massive pre-training corpora due to their long his-tory. In contrast, Cangjie is a nascent language released in July 2025, eliminating pre-training leak-age and providing a rigorous testbed. 
+
+Methods of Code Generation. The landscape of code generation has evolved from code models like Codex (Chen, 2021) to state-of-the-art founda-tion models such as GPT-5 (OpenAI, 2025b), and Qwen-3 (Yang et al., 2025a). However, LLMs still struggle with complex problems. Consequently, the research community has shifted towards enhancing generation through advanced methods, primarily categorized into three paradigms: Prompt Engi-neering (Puerto et al., 2024; Wang et al., 2024), 
+
+Retrieval-Augmented Generation (Liu et al., 2025; Yang et al., 2025b), and Agentic Frameworks (Ope-nAI, 2025a; Anthropic, 2025). However, previous studies on low-resource code typically limit their evaluation to direct zero-shot or few-shot prompt-ing. To the best of our knowledge, this work com-prehensively evaluates these paradigms, systemati-cally exploring which methodology is better. 
+
+3 CANGJIE BENCH 
+
+As illustrated in Figure 1, the C ANGJIE BENCH 
+
+framework comprises three principal components: 
+
+Dataset Construction , Evaluation Task , and 
+
+Evaluation Framework .
+
+3.1 Dataset Construction 
+
+High-quality open-source Cangjie code is scarce, making the traditional crawling approach infeasible. Thus, we adopt a translation-based strategy using 
+
+HumanEval (Chen, 2021) and ClassEval (Du et al., 2023). These datasets represent function-level and class-level Python programming tasks, respectively, meaning the code is self-contained in a single file without external dependencies. Unlike repository-level benchmarks (Yu et al., 2024; Jimenez et al., 2023) that involve complex multi-file environments, this standalone format minimizes translation errors and ensures the correctness of the ground truth. To rigorously translate these Python benchmarks to Cangjie, we adhere to a set of strict construction principles, detailed below. • Type Adaptation: Basic types are mapped to Cangjie equivalents such as int →Int64 ,
+
+float →Float64 , str →String , bool →Bool .And data structures to Cangjie’s Collection li-3Method Cangjie Code NL Prompt    
+
+> Task 1: Text-to-Code Generation Task 2: Code-to-Code Translation
+> Method Cangjie Code Python Code
+> Cangjie Code
+> Cangjie Runtime Cangjie Libraries Test Frameworks
+> Test Result
+> HumanEval ClassEval
+> Solution & Prompt Translation
+> Test Case Translation
+> Interactive Verification
+> Type Adaptation Naming Convention Algorithm Utilization Prompt Transformation Dependency Management
+> Principles Pipelines
+
+Dataset Construction Evaluation Task Evaluation Framework Figure 1: Overview of C ANGJIE BENCH framework. 
+
+brary ( ArrayList , HashMap ). • Naming Convention: We retain the original 
+
+snake_case naming to maintain fidelity and mini-mize ambiguity during translation. • Algorithm Utilization: Cangjie solutions strictly replicate the algorithmic flow of the original Python solutions. • Prompt Transformation: All code-related con-tent within prompts (function signatures, doc-strings, few-shot examples) is manually trans-lated to Cangjie syntax. • Dependency Management: Tasks dependent on third-party libraries lacking Cangjie equivalents (e.g. , sqlite3 , PIL ) are excluded (see Table 3), though we manually implemented lightweight ones like hashlib.md5 .The construction of C ANGJIE BENCH was exe-cuted entirely by the first author, an early adopter who has studied Cangjie since its official release. This process spanned 1.5 months and involved three steps: (1) Manual translation of solutions and prompts; (2) Construction of Cangjie test cases; and (3) Iterative verification to eliminate transla-tion bias. Subsequently, two other authors, who also possess substantial experience with Cangjie, independently reviewed and verified all translated problems, solutions, and test cases to ensure cor-rectness and consistency. The final dataset con-sists of 248 high-quality samples, comprising 164 problems from HumanEval and 84 problems from ClassEval. 
+
+3.2 Evaluation Task 
+
+We design two tasks in C ANGJIE BENCH , cover-ing different granularities: function-level code for the HumanEval subset and class-level code for the ClassEval subset. The first is the classic Text-to-Code generation task, which evaluates the ability of LLMs to synthesize syntactically valid Cangjie code from natural language instructions. In addi-tion to this, we introduce a Code-to-Code transla-tion task, which aims to evaluate the model’s code translation capacity from a high-resource program-ming language to a low-resource programming lan-guage. To evaluate correctness, we follow the testing logic of the original benchmarks. For HumanEval, a sample is considered correct if the generated func-tion passes the test cases. For ClassEval, the criteria are stricter: a sample is correct only if all methods within the class pass their tests. Additionally, we prepare a main test case to verify the overall func-tionality of the generated class. 
+
+3.3 Evaluation Framework 
+
+To ensure an automated, secure, and reproducible evaluation process, we build a dedicated evaluation sandbox encapsulated via Docker 5. It integrates the complete Cangjie runtime, standard libraries, and testing frameworks to form a lightweight, iso-lated execution environment. Beyond executing the test suites for C ANGJIE BENCH , the sandbox also supports the running of any Cangjie code. 
+
+4 Methods 
+
+It is worth noting that we exclude fine-tuning ap-proaches in this study. The primary motivation be-hind C ANGJIE BENCH is not to engineer a special-ized model via massive data, but rather to probe the 
+
+> 5
+
+https://github.com/cjhCoder7/CangjieBench/ tree/main/CangjieBench 
+
+4Direct Generation 
+
+> Syntax-Constrained Generation
+> Grammar Rules
+> LLM
+
+## +
+
+> Question
+> Cangjie Code
+> Agent
+> Usage Guides API Docs
+> Iterative Query Agent LLM
+> RAG
+> Code Repos
+> Usage Guides API Docs
+> Query Transform
+> Search
+
+Figure 2: Overview of our evaluated methods. 
+
+generalization boundaries of existing foundation models. We aim to investigate how well current LLMs can transfer their vast programming knowl-edge from high-resource languages to a syntac-tically distinct, unseen general-purpose language without parameter updates. In practice, when a new language emerges, developers typically lack the compute, data, or time to immediately fine-tune an LLM, making ICL and agentic approaches the most practical options. As Figure 2 shows, we fo-cus on four mainstream paradigms for code-related tasks: Direct Generation, Syntax-Constrained Gen-eration, Retrieval-Augmented Generation (RAG), and Agent-based approaches. 
+
+Direct Generation. In this setting, the model is provided solely with the natural language problem description (for Text-to-Code) or the Python source code (for Code-to-Code), wrapped in a prompt tem-plate (see Appendix A.8). The model relies entirely on its pre-trained weights to infer the syntax and semantics of Cangjie. 
+
+Syntax-Constrained Generation. Cangjie is likely absent from the pre-training data of most models, so they frequently rely on heuristics from other high-resource languages, leading to invalid syntax. To mitigate this, we define a set of simpli-fied yet comprehensive Cangjie grammar rules to guide LLMs. These rules, injected into the prompt, cover essential syntactic structures, type defini-tions, and standard library interfaces (see Appendix A.4.1). This method evaluates whether providing concise grammar rules is sufficient to guide the model’s generalization via in-context learning. 
+
+RAG. We implement two strategies, i.e. , RAG (Docs) and RAG (Code). The first targets official usage guides and API documentation. Instead of using the raw problem description directly, it em-ploys a query transformation approach: the model first generates precise keywords to retrieve the most relevant documentation segments, ensuring the re-trieved context closely aligns with the problem. The second strategy leverages a curated repository of crawled Cangjie code snippets to supply few-shot examples for models. We use lexical matching (via BM25) in RAG. More details are provided in Appendix A.4.2. 
+
+Agent. Unlike RAG where retrieval is prede-termined by the system, this approach employs a CLI-based agent to autonomously consult official Cangjie usage guides and API references. This setup simulates a realistic development process where a program beginner proactively looks up syn-tax details or library functions as needed. By grant-ing the model the agency to decide what to look up and when, this method evaluates the model’s ability to plan and execute a research-driven workflow to bridge its knowledge gap. 
+
+5 Experiments 
+
+In this section, we evaluate the performance of cur-rent state-of-the-art LLMs using our four proposed methods on C ANGJIE BENCH .
+
+5.1 Experimental Setup Evaluated LLMs. We evaluated six open-source and closed-source LLMs on C ANGJIE BENCH . To ensure we assess state-of-the-art performance, we specifically selected open-source models exceed-ing 200B parameters and widely adopted closed-source model. This includes: DeepSeek-V3 (Liu et al., 2024), ERNIE-4.5 (Team, 2025), Kimi-K2 (Team et al., 2025), Qwen3, Qwen3-Coder (Yang et al., 2025a), and GPT-5 (OpenAI, 2025b). Spe-cific details are provided in Appendix A.5.1. 
+
+Evaluated Agents. We pair each agent with its rec-ommended backbone: (1) Codex CLI with GPT-5; (2) Qwen Code CLI with Qwen3-Coder; and (3) 
+
+iFlow CLI with Qwen3-Coder and Kimi-K2. 5Method Model HumanEval ClassEval Avg.                                                                                                                                                                                                                                                                                                                                                      
+
+> Pass@1 Compile Pass@1 Compile Pass@1 Compile
+> Direct
+> DeepSeek-V3 3.0 3.0 3.0 3.0 1.2 1.2 1.2 1.2 2.1 2.1 2.1 2.1 ERNIE-4.5 4.3 4.9 4.3 4.9 0.0 1.2 0.0 1.2 2.2 3.1 2.2 3.1 Kimi-K2 23.8 23.8 23.8 23.8 7.1 8.3 8.3 8.3 15.5 16.1 16.1 16.1
+> Qwen3 4.3 4.3 4.3 4.3 1.2 2.4 1.2 2.4 2.8 3.4 2.8 3.4 Qwen3-Coder 4.3 7.9 4.3 7.9 1.2 1.2 1.2 1.2 2.8 4.6 2.8 4.6 GPT-5 7.3 8.5 7.3 8.5 1.2 3.6 1.2 3.6 4.3 6.1 4.3 6.1
+> Syntax-Constrained
+> DeepSeek-V3 47.6 44.5 47.6 44.5 16.7 6.0 17.9 6.0 32.2 25.3 32.8 25.3 ERNIE-4.5 39.0 35.4 40.9 35.4 2.4 6.0 3.6 6.0 20.7 20.7 22.3 20.7 Kimi-K2 62.2 56.1 62.2 56.1 22.6 15.5 23.8 15.5 42.4 35.8 43.0 35.8 Qwen3 57.3 47.6 57.3 47.6 22.6 14.3 22.6 14.3 40.0 31.0 40.0 31.0 Qwen3-Coder 47.6 51.8 51.8 51.8 22.6 11.9 23.8 13.1 35.1 31.9 37.8 32.5 GPT-5 67.1 45.1 67.1 45.1 40.5 31.0 40.5 31.0 53.8 38.1 53.8 38.1 RAG (Code)
+> DeepSeek-V3 16.5 15.9 16.5 15.9 3.6 4.8 3.6 4.8 10.1 10.4 10.1 10.4 ERNIE-4.5 15.9 18.9 15.9 18.9 6.0 3.6 6.0 3.6 11.0 11.3 11.0 11.3 Kimi-K2 33.5 31.7 34.2 31.7 13.1 9.5 13.1 9.5 23.3 20.6 23.7 20.6 Qwen3 13.4 7.9 13.4 7.9 3.6 7.1 3.6 7.1 8.5 7.5 8.5 7.5 Qwen3-Coder 24.4 18.3 24.4 18.3 7.1 7.1 7.1 7.1 15.8 12.7 15.8 12.7 GPT-5 49.4 47.0 49.4 47.0 13.1 13.1 13.1 13.1 31.3 30.1 31.3 30.1 RAG (Docs)
+> DeepSeek-V3 33.5 22.6 33.5 22.6 9.5 9.5 9.5 9.5 21.5 16.1 21.5 16.1 ERNIE-4.5 13.4 12.8 13.4 12.8 3.6 3.6 3.6 3.6 8.5 8.2 8.5 8.2 Kimi-K2 34.8 34.1 36.6 34.1 11.9 16.7 11.9 16.7 23.4 25.4 24.3 25.4
+> Qwen3 12.8 12.2 12.8 12.2 1.2 4.8 1.2 4.8 7.0 8.5 7.0 8.5 Qwen3-Coder 22.6 18.9 22.6 18.9 6.0 9.5 6.0 9.5 14.3 14.2 14.3 14.2 GPT-5 37.2 32.3 37.2 32.3 15.5 16.7 15.5 16.7 26.4 24.5 26.4 24.5
+> Agent
+> Kimi-K2 (iFlow CLI) 44.5 51.8 44.5 51.8 26.2 27.4 26.2 28.6 35.4 39.6 35.4 40.2 Qwen3-Coder (iFlow CLI) 32.3 33.5 32.3 33.5 9.5 16.7 10.7 17.9 20.9 25.1 21.5 25.7 Qwen3-Coder (Qwen Code CLI) 30.5 27.4 30.5 27.4 8.3 8.3 8.3 8.3 19.4 17.9 19.4 17.9 GPT-5 (Codex CLI) 87.2 87.8 87.2 87.8 67.9 65.5 67.9 65.5 77.6 76.7 77.6 76.7
+
+Table 2: Main results on C ANGJIE BENCH benchmarks. Light gray columns indicate Text-to-Code task, while dark gray columns represent Code-to-Code task. The best result for each method is highlighted in red , and the overall best result across all methods is underlined .
+
+Metrics. We employ three primary metrics to com-prehensively evaluate both the correctness of the generated results and the computational cost of dif-ferent methods: Pass@1 (Chen, 2021), Compile Rate and Token Usage . Appendix A.5.3 provides more detailed definitions. 
+
+5.2 Results on Text-to-Code Task 
+
+Based on the results on the C ANGJIE BENCH text-to-code task in Table 2, we can observe several significant trends: 
+
+Challenges in Cangjie Code. The results from the Direct Generation confirm the extreme diffi-culty of generating Cangjie code without assistance. Specifically, most models, including DeepSeek-V3 and Qwen3, achieve negligible pass@1 scores (<5%), and even GPT-5 only reaches 4.3% on av-erage. Crucially, the Compile Rates are nearly identical to these low pass@1 scores. This implies that the models’ poor performance is not due to logical flaws in algorithm, but rather a fundamental deficiency in syntactic knowledge. The vast ma-jority of generated samples simply fail to compile, confirming that Cangjie is effectively absent from the pre-training corpora. The only outlier is Kimi-K2, which achieves a moderate pass@1 (15.5%), suggesting potential differences in its training data distribution. 
+
+Efficacy of Syntax-Constraints. A significant performance breakthrough is observed when ap-plying the Syntax-Constrained method. By sim-ply injecting expert-curated grammar rules into the prompt, GPT-5’s average pass@1 surges from 4.3% to 53.8% and other models also saw a relatively significant increase under the same method. This result highlights a critical insight: SOTA LLMs already possess the abstract algorithmic logic re-quired to solve these problems, which is transferred from high-resource languages; their primary bottle-neck is merely the lack of surface-level syntactic knowledge. 
+
+RAG vs. Syntax-Constraints. While RAG (Code) and RAG (Docs) improve performance over the direct baseline, they generally underperform compared to the Syntax-Constrained method. For example, GPT-5 with RAG (Code) achieves 31.3%, significantly lower than the 53.8% achieved with syntax constraints. This suggests that for a com-pletely unseen language, explicit and structured grammatical guidance is more effective than re-trieving noisy few-shot examples or fragmented 6Better Performance &Fewer Token  
+
+> Ideal Case
+> Syntax-Constrained +GPT-5
+> Token: 100k Figure 3: Performance-Cost trade-off on Text-to-Code task.
+
+documentation, which the model may struggle to generalize from in a zero-shot manner. Specifi-cally, RAG (Code) fails because LLMs struggle to generalize complex grammar from isolated code snippets, while RAG (Docs) fails primarily due to poor query generation, as LLMs lacking Cangjie knowledge produce low-quality search keywords that cause retriever failure at the source. 
+
+Agent Capabilities and Limitations. The 
+
+Agent paradigm yields the state-of-the-art result, with the GPT-5 driven Codex CLI achieving an impressive 77.6% pass@1. Unlike RAG, where retrieval is passive and predetermined, the Agent autonomously consults documentation to bridge specific knowledge gaps, simulating a human de-veloper’s “research-then-code” workflow. How-ever, it demands high-level planning and reasoning capabilities. Agents driven by Qwen3-Coder and Kimi-K2 show limited improvement compared to their Syntax-Constrained methods. This indicates that open-resource models struggle to effectively decide what to look up or how to integrate the re-trieved syntax into their generation logic. 
+
+5.3 Results on Code-to-Code Task 
+
+The Code-to-Code task evaluates the models’ abil-ity to translate Python solutions into Cangjie. Our analysis focuses on the following aspects: 
+
+Performance Comparison. Similar to the Text-to-Code task, the Direct translation performance is poor across most models due to the lack of Cangjie knowledge. The ranking of models remains con-sistent, with GPT-5 generally leading the perfor-mance in advanced settings (Syntax-Constrained and Agent), while open-resource models struggle to generate compilable code. 
+
+Syntax as the Primary Barrier. Comparing the two tasks, we observe that Code-to-Code trans-lation does not offer a significant advantage over Text-to-Code generation. In low-resource settings, the primary challenge is not deriving the algorith-mic logic (which is provided in the Python source) but rather generating syntactically valid code. The low Compile Rates across both tasks indicate that regardless of the input modality (Natural Language or Python Code), the models struggle equally to generate correct Cangjie Code. 
+
+The Interference of Source Language. Closer examination reveals an important phenomenon: having access to the source code can sometimes reduce performance. Notably, under the Syntax-Constrained method, GPT-5 achieves a pass@1 of 53.8% on the Text-to-Code task but significantly drops to 38.1% on the Code-to-Code task. We hypothesize that this degradation is caused by the model’s tendency to overfit to the Python source patterns. When translating, the model is prone to imitating Python’s dynamic typing and idioms line-by-line, different from Cangjie’s static syn-tax. Conversely, Text-to-Code allows the model to generate the target structure directly, avoiding the interference of the source language’s syntax. 
+
+5.4 Token Usage 
+
+We analyze the token consumption across different methods, as illustrated in Figure 3 and Figure 4. 
+
+Performance-Cost Efficiency. Figure 3 illus-trates the trade-off between model performance (Pass@1) and cost (Token Usage). The top-left corner represents the ideal region, defined as the area achieving maximum accuracy with minimal token consumption. We observe that the Syntax-Constrained method clusters closest to this optimal region. Compared to the Direct method, it yields 7Direct Syntax- 
+
+> Constrained
+> RAG
+> (Code)
+> RAG
+> (Docs)
+> Agent
+> 10 2
+> 10 3
+> 10 4
+> 10 5
+> Token Usage (Log Scale)
+> 37.6%
+> 62.4%
+> 1,313
+> 79.4%
+> 3,556
+> 66.6%
+> 33.4%
+> 2,214
+> 84.2%
+> 5,171
+> 99.1%
+> 504,972
+> Input (Prompt) Output (Completion)
+
+Figure 4: Analysis of token consumption for GPT-5 on Text-to-Code task. We report the total token usage (log scale) split into Input and Output percentages. 
+
+substantial performance gains with only a slight increase in token usage, demonstrating the high-est cost-effectiveness. In contrast, while the Agent 
+
+method (specifically Codex CLI) achieves superior performance, its cost control falls short. The itera-tive process of constantly querying documentation and analyzing feedback results in excessive token consumption. 
+
+Token Composition. Figure 4 details the ra-tio of input (prompt) to output (completion) to-kens. Methods like Syntax-Constrained and RAG 
+
+maintain a relatively balanced distribution, with input percentages ranging from 66.6% to 84.2%. This indicates that these methods efficiently utilize context—such as grammar rules or retrieved snip-pets—to guide generation without overwhelming the context window. In contrast, the Agent method exhibits an extreme skew, where input tokens ac-count for 99.1% of the total usage. This extreme ratio indicates low generation efficiency, as the vast majority of computational resources are spent on reading context rather than producing valid code. This is because the agent must repeatedly read ex-tensive documentation and interaction history dur-ing its iterative workflow. While this massive input improves accuracy, the resulting high cost and la-tency make the Agent less suitable for applications. 
+
+6 Discussion 
+
+The Future Direction of Low-Resource Code Generation. Traditionally, adapting models to a new language involves expensive pre-training or fine-tuning with massive datasets. However, as new programming languages constantly emerge, the training data inevitably lags behind. First, the Syntax-Constrained method demonstrates that high-quality context can substitute for weight up-dates. Since LLMs already understand algorithmic logic from high-resource languages, future work should focus on developing automated methods to extract and inject minimal yet effective gram-mar rules, which could allow models to master any new language instantly. Notably, our Pass@10 experiments (Appendix A.7) show that the Syntax-Constrained method with an expanded sampling budget achieves dramatic improvements, suggest-ing models can correct syntax errors when allowed to explore the syntax space. Second, we observe a clear trade-off between performance and cost. While Agents achieve the best results, their high token consumption makes them impractical for ap-plications. A promising direction is to use Syntax-Constrained method for simple tasks and dynami-cally switch to an Agent approach only when the code fails to compile or requires complex library usage. 
+
+The Future Direction of Cross-Lingual Trans-fer. A surprising finding is that source code (Code-to-Code) can sometimes hinder performance, as LLMs tend to overfit to the source language’s syn-tax. Future research should explore semantics-aligned translation. Instead of translating code line-by-line, models should perhaps first summarize the source code into a intermediate representation be-fore generating the target code. This would help strip away the “syntax noise” of the source lan-guage, allowing the model to focus on correctly implementing the logic in the target language’s structure. 
+
+7 Conclusion 
+
+In this work, we introduced C ANGJIE BENCH , a contamination-free benchmark for Cangjie derived from HumanEval and ClassEval. Unlike prior DSL-focused benchmarks, it targets general-purpose syn-tax and supports both code generation and transla-tion tasks. We systematically evaluated four strate-gies, finding that Syntax-Constrained Generation offers the best balance between cost and accuracy, while Agent-based methods achieve the state-of-the-art. Surprisingly, our experiments reveal that Code-to-Code translation often suffers from neg-ative transfer compared to Text-to-Code genera-tion. C ANGJIE BENCH aims to drive future research 8in efficient adaptation and generalization for low-resource languages. 
+
+Limitations 
+
+The official version of Cangjie was released on July 1, 2025. LLMs used in our experiments have training data cutoff dates before this time. However, as Cangjie becomes more popular, future versions of LLMs will inevitably include Cangjie code in their training sets. Therefore, the low-resource status of our benchmark may change in the future. Despite this, Cangjie currently serves as an ideal window to rigorously test how models generalize to low-resource languages. We acknowledge that HarmonyOS also uses ArkTS for application development. However, ArkTS is a superset of TypeScript. Since current LLMs are already very good at TypeScript, ArkTS does not present a major challenge for them. In contrast, Cangjie is a natively developed general-purpose language. Its syntax is distinct from other mainstream languages. We chose Cangjie to strictly test the model’s ability to learn a new syntax. Additionally, our current benchmark mainly fo-cuses on standalone code snippets. However, real-world Cangjie development is often more complex. It usually involves multiple files, external depen-dencies, and interactions across a whole project. This creates a gap between our current tests and actual coding scenarios. In preliminary cross-file experiments on two multi-file Cangjie reposito-ries (Markdown4cj and Httpclient4cj), all evalu-ated models achieved near-zero success rates, as they could neither correctly infer syntax rules nor adhere to cross-file API contracts. Future research should consider Cangjie code generation and trans-lation at the repository level to better reflect these real-world challenges. Finally, we could not test all available LLMs on the market due to the high cost of APIs. Instead, we selected a representative set of high-performance models from both open-source and closed-source categories. Future research could expand this eval-uation to a wider range of models. 
+
+Ethical Considerations 
+
+The construction of C ANGJIE BENCH strictly ad-heres to the licensing terms of all source materials. The core evaluation dataset is derived from Hu-manEval and ClassEval . Both source datasets are distributed under the MIT License, which permits modification, distribution, and private use. Conse-quently, our manually translated derivative work complies with these legal frameworks. For the RAG experiments, we utilize two types of external knowledge: official documentation and public code repositories. The official Cangjie doc-umentation is used in accordance with the CC-BY-4.0 license, allowing us to incorporate it into our retrieval corpus with appropriate attribution. Re-garding the public Cangjie repositories used for code retrieval, we do not redistribute the raw code data directly. Instead, we release only the repos-itory metadata. This ensures that access to the data remains subject to the original repositories’ availability and licensing terms, thereby avoiding copyright infringement. 
+
+References                  
+
+> Wasi Ahmad, Md Golam Rahman Tushar, Saikat Chakraborty, and Kai-Wei Chang. 2023. Avatar: A parallel corpus for java-python program translation. In Findings of the Association for Computational Linguistics: ACL 2023, pages 2268–2281. Anthropic. 2025. Claude code. URL https://www. claude.com/product/claude-code .Jacob Austin, Augustus Odena, Maxwell Nye, Maarten Bosma, Henryk Michalewski, David Dohan, Ellen Jiang, Carrie Cai, Michael Terry, Quoc Le, and 1 others. 2021. Program synthesis with large language models. arXiv preprint arXiv:2108.07732. Federico Cassano, John Gouwar, Daniel Nguyen, Syd-ney Nguyen, Luna Phipps-Costin, Donald Pinckney, Ming-Ho Yee, Yangtian Zi, Carolyn Jane Anderson, Molly Q Feldman, and 1 others. 2023. Multipl-e: A scalable and polyglot approach to benchmarking neu-ral code generation. IEEE Transactions on Software Engineering, 49(7):3675–3691. Mark Chen. 2021. Evaluating large language models trained on code. arXiv preprint arXiv:2107.03374. Artem Chervyakov, Alexander Kharitonov, Pavel Zadorozhny, Adamenko Pavel, Rodion Levichev, Dmitrii Vorobev, Dmitrii Salikhov, Aidar Valeev, Alena Pestova, Maria Dziuba, and 1 others. 2025. Mera code: Aunified framework for evaluat-ing code generation across tasks. arXiv preprint arXiv:2507.12284. Etienne Daspe, Mathis Durand, Julien Hatin, and Salma Bradai. 2024. Benchmarking large language mod-els for ethereum smart contract development. In 2024 6th Conference on Blockchain Research & Applications for Innovative Networks and Services (BRAINS), pages 1–4. IEEE.
+
+9Xueying Du, Mingwei Liu, Kaixin Wang, Hanlin Wang, Junwei Liu, Yixuan Chen, Jiayi Feng, Chaofeng Sha, Xin Peng, and Yiling Lou. 2023. Classe-val: A manually-crafted benchmark for evaluating llms on class-level code generation. arXiv preprint arXiv:2308.01861. Minghua He, Yue Chen, Fangkai Yang, Pu Zhao, Wen-jie Yin, Yu Kang, Qingwei Lin, Saravan Rajmohan, and Dongmei Zhang. 2025. Execoder: Empowering large language models with executability represen-tation for code translation. In Proceedings of the 2025 Conference on Empirical Methods in Natural Language Processing, pages 7110–7136. Huawei. 2025. Cangjie language documentation (v1.0.0). URL https://cangjie-lang.cn/en/ docs?url=%2F1.0.0%2F .Naman Jain, King Han, Alex Gu, Wen-Ding Li, Fanjia Yan, Tianjun Zhang, Sida Wang, Armando Solar-Lezama, Koushik Sen, and Ion Stoica. 2024. Live-codebench: Holistic and contamination free eval-uation of large language models for code. arXiv preprint arXiv:2403.07974. Carlos E Jimenez, John Yang, Alexander Wettig, Shunyu Yao, Kexin Pei, Ofir Press, and Karthik Narasimhan. 2023. Swe-bench: Can language mod-els resolve real-world github issues? arXiv preprint arXiv:2310.06770. Sathvik Joel, Jie Wu, and Fatemeh Fard. 2024. A survey on llm-based code generation for low-resource and domain-specific programming languages. ACM Transactions on Software Engineering and Methodology. Sahil Kale and Vijaykant Nadadur. 2025. Texpert: A multi-level benchmark for evaluating latex code gen-eration by llms. arXiv preprint arXiv:2506.16990. Anirudh Khatry, Robert Zhang, Jia Pan, Ziteng Wang, Qiaochu Chen, Greg Durrett, and Isil Dil-lig. 2025. Crust-bench: A comprehensive bench-mark for c-to-safe-rust transpilation. arXiv preprint arXiv:2504.15254. Jinyang Li, Binyuan Hui, Ge Qu, Jiaxi Yang, Binhua Li, Bowen Li, Bailin Wang, Bowen Qin, Ruiying Geng, Nan Huo, and 1 others. 2023. Can llm already serve as a database interface? a big bench for large-scale database grounded text-to-sqls. Advances in Neural Information Processing Systems, 36:42330–42357. Aixin Liu, Bei Feng, Bing Xue, Bingxuan Wang, Bochao Wu, Chengda Lu, Chenggang Zhao, Chengqi Deng, Chenyu Zhang, Chong Ruan, and 1 others. 2024. Deepseek-v3 technical report. arXiv preprint arXiv:2412.19437. Mingjie Liu, Nathaniel Pinckney, Brucek Khailany, and Haoxing Ren. 2023. Verilogeval: Evaluat-ing large language models for verilog code gener-ation. In 2023 IEEE/ACM International Conference on Computer Aided Design (ICCAD) , pages 1–8. IEEE. Yang Liu, Li Zhang, Fang Liu, Zhuohang Wang, Donglin Wei, Zhishuo Yang, Kechi Zhang, Jia Li, and Lin Shi. 2025. Reposcope: Leveraging call chain-aware multi-view context for repository-level code generation. arXiv preprint arXiv:2507.14791. OpenAI. 2025a. Introducing codex. URL https:// openai.com/index/introducing-codex/ .OpenAI. 2025b. Introducing gpt-5. URL https:// openai.com/index/introducing-gpt-5/ .Anne Ouyang, Simon Guo, Simran Arora, Alex L Zhang, William Hu, Christopher Ré, and Azalia Mirhoseini. 2025. Kernelbench: Can llms write effi-cient gpu kernels? arXiv preprint arXiv:2502.10517. Zhiyuan Peng, Xin Yin, Rui Qian, Peiqin Lin, Yongkang Liu, Hao Zhang, Chenhao Ying, and Yuan Luo. 2025. Soleval: Benchmarking large language models for repository-level solidity code generation. arXiv preprint arXiv:2502.18793. Haritz Puerto, Martin Tutek, Somak Aditya, Xiaodan Zhu, and Iryna Gurevych. 2024. Code prompting elicits conditional reasoning abilities in text+ code llms. In Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing ,pages 11234–11258. Baidu ERNIE Team. 2025. Ernie 4.5 technical report. Kimi Team, Yifan Bai, Yiping Bao, Guanduo Chen, Jiahao Chen, Ningxin Chen, Ruijue Chen, Yanru Chen, Yuankun Chen, Yutian Chen, and 1 others. 2025. Kimi k2: Open agentic intelligence. arXiv preprint arXiv:2507.20534. Amitayush Thakur, Jasper Lee, George Tsoukalas, Meghana Sistla, Matthew Zhao, Stefan Zetzsche, Greg Durrett, Yisong Yue, and Swarat Chaud-huri. 2025. Clever: A curated benchmark for formally verified code generation. arXiv preprint arXiv:2505.13938. Prashanth Vijayaraghavan, Luyao Shi, Stefano Am-brogio, Charles Mackin, Apoorva Nitsure, David Beymer, and Ehsan Degan. 2024. Vhdl-eval: Aframework for evaluating large language models in vhdl code generation. In 2024 IEEE LLM Aided Design Workshop (LAD), pages 1–6. IEEE. Ngoc Phuoc An Vo, Brent Paulovicks, and Vadim Sheinin. 2024. Tackling execution-based evaluation for nl2bash. CoRR. Hanbin Wang, Zhenghao Liu, Shuo Wang, Ganqu Cui, Ning Ding, Zhiyuan Liu, and Ge Yu. 2024. Inter-venor: Prompting the coding ability of large lan-guage models with the interactive chain of repair. In Findings of the Association for Computational Linguistics: ACL 2024, pages 2081–2107. Min Xue, Artur Andrzejak, and Marla Leuther. 2024. An interpretable error correction method for enhancing code-to-code translation. In 
+
+10 The Twelfth International Conference on Learning Representations. Pengyu Xue, Linhao Wu, Zhen Yang, Chengyi Wang, Xiang Li, Yuxiang Zhang, Jia Li, Ruikai Jin, Yifei Pei, Zhaoyan Shen, and 1 others. 2025. Classeval-t: Evaluating large language models in class-level code translation. Proceedings of the ACM on Software Engineering, 2(ISSTA):1421–1444. An Yang, Anfeng Li, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo Zheng, Bowen Yu, Chang Gao, Chengen Huang, Chenxu Lv, and 1 others. 2025a. Qwen3 technical report. arXiv preprint arXiv:2505.09388. Zezhou Yang, Sirong Chen, Cuiyun Gao, Zhenhao Li, Xing Hu, Kui Liu, and Xin Xia. 2025b. An empir-ical study of retrieval-augmented code generation: Challenges and opportunities. ACM Transactions on Software Engineering and Methodology. Hao Yu, Bo Shen, Dezhi Ran, Jiaxin Zhang, Qi Zhang, Yuchi Ma, Guangtai Liang, Ying Li, Qianxiang Wang, and Tao Xie. 2024. Codereval: A benchmark of prag-matic code generation with generative pre-trained models. In Proceedings of the 46th IEEE/ACM International Conference on Software Engineering ,pages 1–12. Longhui Zhang, Bin Wang, Jiahao Wang, Xiaofeng Zhao, Min Zhang, Hao Yang, Meishan Zhang, Yu Li, Jing Li, and Jun Yu. 2025. Function-to-style guid-ance of llms for code translation. In Forty-second International Conference on Machine Learning. Qianhui Zhao, Li Zhang, Fang Liu, Junhang Cheng, Chengru Wu, Junchen Ai, Qiaoyuanhe Meng, Lichen Zhang, Xiaoli Lian, Shubin Song, and 1 others. 2025. Towards realistic project-level code generation via multi-agent collaboration and semantic architecture modeling. arXiv preprint arXiv:2511.03404. Zixiao Zhao and Fatemeh Fard. 2025. Do current language models support code intelligence for r programming language? ACM Transactions on Software Engineering and Methodology , 34(8):1– 39. 
+
+A Appendix 
+
+A.1 Cangjie Programming Language 
+
+Figure 8 illustrates the syntactic distinctions be-tween Cangjie and other programming languages through concise code snippets. 
+
+A.2 CANGJIE BENCH Statics 
+
+The final C ANGJIE BENCH dataset comprises 248 
+
+high-quality samples. For the HumanEval source, we successfully migrated all 164 original problems, as they primarily focus on fundamental algorithmic logic and standard data structures that map directly to the Cangjie standard library. For the ClassEval source, we retained 84 out of the original 100 problems. We excluded 16 tasks that heavily relied on specific Python third-party ecosystems which currently lack equivalents in Cangjie. These exclusions ensure that the bench-mark remains fair and does not penalize models for the lack of language maturity. Table 3 provides a detailed list of the excluded tasks and the specific reasons for their removal. 
+
+A.3 Example of Problem 
+
+Figure 10 and Figure 9 illustrate sample problems from the HumanEval and ClassEval subsets of CANGJIE BENCH , respectively. 
+
+A.4 Details of Methods 
+
+This section provides specific implementation de-tails for the methods used in our experiments. 
+
+A.4.1 Syntax-Constrained Generation 
+
+To guide the LLMs in generating valid Cangjie code, we injected a concise set of grammar rules into the input prompt. We defined 20 specific categories of constraints to cover the essential as-pects of the Cangjie: Program Structure , Vari-ables , Numeric Types , Strings and Characters ,
+
+Boolean Type , Arrays and Dynamic Arrays ,
+
+Hash Maps , Hash Sets , Sorting , Tuples , Con-ditional Statements , Loop Statements , Option Type , Match Expressions , Lambda Expressions ,
+
+Input and Output , Functions , Classes , Inter-faces , Keywords . This grammar introduction com-prises 2,146 tokens based on the GPT-5 tokenizer. These rules serve as a quick reference for the model to understand the distinct syntax of Cangjie via in-context learning. 
+
+A.4.2 RAG Corpus Preparation We constructed two dis-tinct corpora to support our RAG experiments: • Official Documentation Corpus: Derived from official GitCode repository 6, this corpus consists of the Cangjie Developer Manual and Standard Library API documentation. To better improve retrieval, we pre-processed the data by remov-ing HTML tags. We also divided the text into segments based on headers. • Cangjie Codebase Corpus: We established a high-quality code repository by crawling open-source projects from GitCode 7. We employed 
+
+> 6https://gitcode.com/Cangjie/CangjieCorpus
+> 7https://gitcode.com/
+
+11 Probelem ID Problem Name Exclusion Reason                                                                   
+
+> ClassEval_14 BookManagementDB Dependency on sqlite3 for database operations ClassEval_25 CookiesUtil Dependency on json for data serialization ClassEval_28 DatabaseProcessor Dependency on sqlite3 for database operations ClassEval_34 DocFileHandler Dependency on docx for Word document processing ClassEval_38 ExcelProcessor Dependency on openpyxl for Excel spreadsheet manipulation ClassEval_44 HtmlUtil Dependency on bs4 for parsing and gensim for NLP processing ClassEval_45 ImageProcessor Dependency on PIL for image processing ClassEval_50 JSONProcessor Dependency on json for data serialization ClassEval_52 Lemmatization Dependency on nltk for NLP processing ClassEval_60 MovieTicketDB Dependency on sqlite3 for database operations ClassEval_69 PDFHandler Dependency on PyPDF2 for PDF document manipulation ClassEval_83 StudentDatabaseProcessor Dependency on sqlite3 for database operations ClassEval_84 TextFileProcessor Dependency on json for data serialization ClassEval_92 UserLoginDB Dependency on sqlite3 for database operations ClassEval_98 XMLProcessor Dependency on xml for XML data parsing ClassEval_99 ZipFileProcessor Dependency on zipfile for ZIP archive management
+
+Table 3: List of excluded ClassEval tasks and exclusion reasons. 
+
+the keyword “Cangjie” for initial search. To ensure corpus quality, we applied a strict filter-ing criterion, retaining only repositories where Cangjie constitutes more than 80% of the code-base. The collected files were parsed using ab-stract syntax trees (AST) to extract standalone functions and class definitions. Data collection was concluded prior to November 10. The final codebase corpus consists of 30,341 functions and 31,483 classes. 
+
+Retrieval Strategy We tailored our retrieval strat-egy to the distinct nature of each corpus. For both strategies described below, we retrieve the top k = 3 most relevant candidates to augment the generation context without introducing excessive noise. • Documentation Retrieval via Query Transfor-mation. Directly using problem descriptions for retrieval is often ineffective due to the semantic gap between the problem statement and technical documentation. To address this, we employ a 
+
+Query Transformation method. An LLM acts as an intermediate agent, analyzing the input prob-lem to extract and generate technical keywords (e.g. , specific library names, API methods, or pro-gramming concepts). These refined keywords are then used to query the Official Documentation corpus. • Code Retrieval via Direct Matching. For the Codebase corpus, the goal is to find syntactically or functionally similar implementations. Since the input prompt often contains code snippets or function signatures, we perform direct matching against the crawled code snippets. 
+
+Retrieval Algorithm We employ the BM25 al-gorithm for similarity calculation: • BM25: We utilize the Okapi BM25 algorithm, a probabilistic information retrieval model that ranks documents based on the term frequency-inverse document frequency (TF-IDF) schema. We utilized the standard implementation 8 with default parameters. As mentioned, the top 3 re-sults with the highest BM25 scores are selected as the retrieved context. 
+
+A.4.3 Agent 
+
+We implemented a CLI-based agent that interacts with the official documentation. To ensure the safety and integrity of the local environment, we use Git 9 for version control. The agent is granted read access to the documen-tation but might attempt invalid write operations. To prevent this, we track the documentation di-rectory with Git. After every interaction turn, the system automatically checks for file changes. If any modification is detected, the system executes a rollback command to revert the environment to its original state. This ensures a consistent and isolated environment for each inference step. 
+
+> 8https://github.com/dorianbrown/rank_bm25
+> 9https://git-scm.com/
+
+12 A.5 Details of Experiments A.5.1 Details of Models 
+
+To ensure that our experiments can explore the per-formance boundaries of current LLMs, we selected a set of high-performing SOTA models. These selections include both open-source and closed-source models, representing the most advanced LLMs developed by their respective organizations to date. For the inference process, we utilized the open-source models through the SiliconFlow platform 
+
+> 10
+
+. And the closed-source models were accessed directly via their official APIs. For the generation parameters, we set the max_tokens to 8192, while keeping all other hyperparameters at model’s de-fault values. This limit was chosen to guarantee that the models have capacity to complete their generation, as the token length of the code solu-tions for every problem in our dataset is well below 8192. The detailed specifications and sources for all models used in this study are listed in Table 4. 
+
+A.5.2 Details of Agents 
+
+Table 5 provides an overview of the CLI-based agent frameworks employed in our study, along with their corresponding open-source repositories. 
+
+A.5.3 Metric Definitions 
+
+In this section, we provide the formal definitions and motivations for the evaluation metrics used in our experiments. 
+
+Pass@1 Following the standard evaluation met-ric established by HumanEval (Chen, 2021), we use Pass@1 to measure the functional correctness of the generated code. A solution is considered cor-rect if and only if it passes all the unit tests provided in the problem description. Formally, for a given problem P , let S be the generated solution. The score for this problem is defined as: 
+
+Score (P ) = 
+
+(
+
+1 if Eval (S, T ests P )0 otherwise (1) The final Pass@1 score is the average accuracy across the entire dataset. This metric serves as the primary indicator of the model’s ability to solve programming tasks in the Cangjie programming language. 
+
+> 10 https://www.siliconflow.com/
+
+Compile Rate Since Cangjie is a statically typed, compiled language with strict syntax rules, the abil-ity to generate syntactically valid code is a prereq-uisite for functional correctness. Large Language Models, due to a lack of pre-training data, often hal-lucinate syntax from other high-resource languages, 
+
+e.g. , Python or Java. To quantify this, we define Compile Rate as the proportion of generated solutions that success-fully pass the Cangjie compiler without raising any syntax errors: 
+
+Compile_Rate = 1
+
+N
+
+> N
+
+X
+
+> i=1
+
+I(Compiles (Si)) (2) where N is the total number of problems and I(·)
+
+is the indicator function. A high compile rate indi-cates that the model has successfully grasped the grammatical structure of the unseen language, even if the logic is incorrect. 
+
+Token Usage While Agent and RAG workflows typically yield higher performance, they incur sig-nificantly higher computational costs due to multi-turn interactions and context retrieval. To evaluate the trade-off between performance and efficiency, we track Token Usage .We record the total number of tokens pro-cessed—including both input prompts and output completions—across the entire problem-solving session. This metric serves as a proxy for the in-ference latency and financial cost associated with each method. We adopt distinct calculation ways based on model accessibility: • Open-Source Models: For models with acces-sible weights ( e.g. , DeepSeek-V3, Qwen3), we utilize the official tokenizers provided via the Hugging Face transformers library. • Closed-Source Models: For closed-source mod-els ( e.g. , GPT-5), we log the exact token usage (prompt_tokens and completion_tokens ) di-rectly from the API response metadata for every call. 
+
+A.6 Full Results 
+
+This section presents the comprehensive experi-mental data. Table 6 and Table 7 detail the de-tailed performance metrics for the Text-to-Code and Code-to-Code tasks, respectively. Table 8 pro-vides the baseline performance of the evaluated 13 Open Source Models Model Name Model Size HuggingFace URL               
+
+> DeepSeek-V3 671B https://huggingface.co/deepseek-ai/DeepSeek-V3-0324
+> ERNIE-4.5 300B https://huggingface.co/baidu/ERNIE-4.5-300B-A47B-PT
+> Kimi-K2 1T https://huggingface.co/moonshotai/Kimi-K2-Instruct-0905
+> Qwen3 235B https://huggingface.co/Qwen/Qwen3-235B-A22B-Instruct-2507
+> Qwen3-Coder 480B https://huggingface.co/Qwen/Qwen3-Coder-480B-A35B-Instruct
+> Closed Source Models Model Name Model Size Blog URL
+> GPT-5 https://openai.com/index/introducing-gpt-5
+
+Table 4: Overview of LLMs used in our experiments.             
+
+> Agent Name Backbone Models Version GitHub URL
+> Codex CLI GPT-5 0.63.0 https://github.com/openai/codex
+> Qwen Code CLI Qwen3-Coder 0.2.3 https://github.com/QwenLM/qwen-code
+> iFlow CLI Qwen3-Coder, Kimi-K2 0.4.8 https://github.com/iflow-ai/iflow-cli
+
+Table 5: Source codes and frameworks for the evaluated Agents. 
+
+models on the original Python datasets using the Direct generation method. Figure 5 illustrates the performance-cost trade-off for the Code-to-Code task. Figure 6 breaks down the input and output token distribution for Qwen-Coder, while Figure 7 compares the gener-ation efficiency across methods using the Pass@1 per 1k input tokens metric. Finally, the specific statistics about token consumption for each method are listed in Table 9 for the Text-to-Code task and Table 10 for the Code-to-Code task. 
+
+A.7 Pass@10 Results 
+
+To provide a fairer comparison with the Agent method’s substantially larger token budget, we conducted Pass@10 experiments for the Syntax-Constrained method on the Text-to-Code task. As shown in Table 11, all models exhibit dramatic improvements under Pass@10, with several even surpassing the Agent’s Pass@1 results. This sug-gests that the low Pass@1 rates are primarily due to models’ difficulty in perfectly aligning all strict syntax constraints in a single generation; when al-lowed to explore the syntax space with a modestly expanded sampling budget, models can success-fully self-correct and produce compilable code. 
+
+A.8 Prompts 
+
+In this section, we present all the prompts utilized for C ANGJIE BENCH , as illustrated in Figures 11, 12, 13, 14, 15, 16, 17, 18, 19 and 20. 14 Method Model HumanEval ClassEval 
+
+Pass Compile Pass Compile Func Main % # % # % # % # % # % #
+
+Direct 
+
+DeepSeek-V3 3.0 5 3.0 5 1.2 1 1.2 1 1.5 5 1.2 1ERNIE-4.5 4.3 7 4.3 7 0.0 0 0.0 0 0.0 0 0.0 0Kimi-K2 23.8 39 23.8 39 7.1 6 8.3 7 8.5 29 7.1 6
+
+Qwen3 4.3 7 4.3 7 1.2 1 1.2 1 1.2 4 1.2 1Qwen3-Coder 4.3 7 4.3 7 1.2 1 1.2 1 1.2 4 1.2 1GPT-5 7.3 12 7.3 12 1.2 1 1.2 1 1.8 6 1.2 1
+
+Syntax-Constrained 
+
+DeepSeek-V3 47.6 78 47.6 78 16.7 14 17.9 15 15.8 54 16.7 14 ERNIE-4.5 39.0 64 40.9 67 2.4 2 3.6 3 5.3 18 2.4 2Kimi-K2 62.2 102 62.2 102 22.6 19 23.8 20 25.4 87 22.6 19 Qwen3 57.3 94 57.3 94 22.6 19 22.6 19 22.2 76 22.6 19 Qwen3-Coder 47.6 78 51.8 85 22.6 19 23.8 20 22.5 77 22.6 19 GPT-5 67.1 110 67.1 110 40.5 34 40.5 34 35.4 121 40.5 34 RAG (Code) 
+
+DeepSeek-V3 16.5 27 16.5 27 3.6 3 3.6 3 4.7 16 3.6 3ERNIE-4.5 15.9 26 15.9 26 6.0 5 6.0 5 5.3 18 6.0 5Kimi-K2 33.5 55 34.2 56 13.1 11 13.1 11 14.9 51 13.1 11 
+
+Qwen3 13.4 22 13.4 22 3.6 3 3.6 3 3.8 13 3.6 3Qwen3-Coder 24.4 40 24.4 40 7.1 6 7.1 6 7.3 25 7.1 6GPT-5 49.4 81 49.4 81 13.1 11 13.1 11 13.5 46 13.1 11 RAG (Docs) 
+
+DeepSeek-V3 33.5 55 33.5 55 9.5 8 9.5 8 8.5 29 9.5 8ERNIE-4.5 13.4 22 13.4 22 3.6 3 3.6 3 3.5 12 3.6 3Kimi-K2 34.8 57 36.6 60 11.9 10 11.9 10 12.3 42 11.9 10 Qwen3 12.8 21 12.8 21 1.2 1 1.2 1 0.6 2 1.2 1Qwen3-Coder 22.6 37 22.6 37 6.0 5 6.0 5 5.6 19 6.0 5GPT-5 37.2 61 37.2 61 15.5 13 15.5 13 13.7 47 15.5 13 Agent 
+
+Kimi-K2 (iFlow CLI) 44.5 73 44.5 73 26.2 22 26.2 22 25.4 87 26.2 22 Qwen3-Coder (iFlow CLI) 32.3 53 32.3 53 9.5 8 10.7 9 12.0 41 9.5 8Qwen3-Coder (Qwen Code CLI) 30.5 50 30.5 50 8.3 7 8.3 7 9.7 33 8.3 7GPT-5 (Codex CLI) 87.2 143 87.2 143 67.9 57 67.9 57 69.9 239 67.9 57 
+
+Table 6: Full results on C ANGJIE BENCH Text-to-Code task. The symbol % denotes the pass rate (pass@1 or success rate), and # denotes the count of successful instances. Func and Main refer to function-level and main-function-level evaluations on ClassEval, respectively. Best results per method are red , overall best are underlined .Better Performance &Fewer Token 
+
+> Ideal Case
+> Direct + Kimi-K2
+> Token: 100k
+
+Figure 5: Performance-Cost trade-off on the Code-to-Code task. 
+
+15 Method Model HumanEval ClassEval 
+
+Pass Compile Pass Compile Func Main % # % # % # % # % # % #
+
+Direct 
+
+DeepSeek-V3 3.0 5 3.0 5 1.2 1 1.2 1 1.2 4 1.2 1ERNIE-4.5 4.9 8 4.9 8 1.2 1 1.2 1 1.2 4 1.2 1Kimi-K2 23.8 39 23.8 39 8.3 7 8.3 7 8.8 30 8.3 7
+
+Qwen3 4.3 7 4.3 7 2.4 2 2.4 2 2.3 8 2.4 2Qwen3-Coder 7.9 13 7.9 13 1.2 1 1.2 1 1.2 4 1.2 1GPT-5 8.5 14 8.5 14 3.6 3 3.6 3 4.1 14 3.6 3
+
+Syntax-Constrained 
+
+DeepSeek-V3 44.5 73 44.5 73 6.0 5 6.0 5 5.3 18 6.0 5ERNIE-4.5 35.4 58 35.4 58 6.0 5 6.0 5 5.8 20 6.0 5Kimi-K2 56.1 92 56.1 92 15.5 13 15.5 13 13.2 45 15.5 13 Qwen3 47.6 78 47.6 78 14.3 12 14.3 12 11.7 40 14.3 12 Qwen3-Coder 51.8 85 51.8 85 11.9 10 13.1 11 12.0 41 11.9 10 GPT-5 45.1 74 45.1 74 31.0 26 31.0 26 27.5 94 31.0 26 RAG (Code) 
+
+DeepSeek-V3 15.9 26 15.9 26 4.8 4 4.8 4 4.4 15 4.8 4ERNIE-4.5 18.9 31 18.9 31 3.6 3 3.6 3 3.5 12 3.6 3Kimi-K2 31.7 52 31.7 52 9.5 8 9.5 8 11.7 40 9.5 8Qwen3 7.9 13 7.9 13 7.1 6 7.1 6 7.6 26 7.1 6Qwen3-Coder 18.3 30 18.3 30 7.1 6 7.1 6 7.6 26 7.1 6GPT-5 47.0 77 47.0 77 13.1 11 13.1 11 13.2 45 13.1 11 RAG (Docs) 
+
+DeepSeek-V3 22.6 37 22.6 37 9.5 8 9.5 8 9.1 31 9.5 8ERNIE-4.5 12.8 21 12.8 21 3.6 3 3.6 3 3.2 11 3.6 3Kimi-K2 34.1 56 34.1 56 16.7 14 16.7 14 15.8 54 16.7 14 
+
+Qwen3 12.2 20 12.2 20 4.8 4 4.8 4 3.8 13 4.8 4Qwen3-Coder 18.9 31 18.9 31 9.5 8 9.5 8 9.4 32 9.5 8GPT-5 32.3 53 32.3 53 16.7 14 16.7 14 16.7 54 16.7 14 Agent 
+
+Kimi-K2 (iFlow CLI) 51.8 85 51.8 85 27.4 23 28.6 24 27.5 94 28.6 24 Qwen3-Coder (iFlow CLI) 33.5 55 33.5 55 16.7 14 17.9 15 18.7 64 16.7 14 Qwen3-Coder (Qwen Code CLI) 27.4 45 27.4 45 8.3 7 8.3 7 8.8 30 8.3 7GPT-5 (Codex CLI) 87.8 144 87.8 144 65.5 55 65.5 55 65.2 223 65.5 55 
+
+Table 7: Full results on C ANGJIE BENCH Code-to-Code task. The symbol % denotes the pass rate (pass@1 or success rate), and # denotes the count of successful instances. Func and Main refer to function-level and main-function-level evaluations on ClassEval, respectively. Best results per method are red , overall best are underlined .Direct Syntax-  
+
+> Constrained
+> RAG
+> (Code)
+> RAG
+> (Docs)
+> Agent
+> (iFlow)
+> Agent
+> (Qwen Code CLI)
+> 10 2
+> 10 3
+> 10 4
+> 10 5
+> Token Usage (Log Scale)
+> 46.1%
+> 53.9%
+> 1,097
+> 82.6%
+> 3,464
+> 72.8%
+> 27.2%
+> 2,058
+> 87.8%
+> 4,662 97.6%
+> 36,141
+> 99.2%
+> 218,845
+> Input (Prompt) Output (Completion)
+
+(a) Text-to-Code Task Direct Syntax-   
+
+> Constrained
+> RAG
+> (Code)
+> RAG
+> (Docs)
+> Agent
+> (iFlow)
+> Agent
+> (Qwen Code CLI)
+> 10 2
+> 10 3
+> 10 4
+> 10 5
+> Token Usage (Log Scale)
+> 51.5%
+> 48.5%
+> 1,022
+> 82.0%
+> 3,514
+> 74.8%
+> 25.2%
+> 2,367
+> 88.2%
+> 4,871 97.5%
+> 35,394
+> 99.3%
+> 244,363
+> Input (Prompt) Output (Completion)
+
+(b) Code-to-Code Task 
+
+Figure 6: Token usage analysis for Qwen-Coder on (a) Text-to-Code and (b) Code-to-Code tasks. We report the total token usage (log scale) split into Input and Output percentages. 
+
+16 Direct Syntax-   
+
+> Constrained
+> RAG
+> (Code)
+> RAG
+> (Docs)
+> Agent
+> (iFlow CLI)
+> 0
+> 5
+> 10
+> 15
+> 20
+> 25
+> 30
+> 35
+> Pass@1 per 1k input tokens
+> 31.2
+> 15.1 15.8
+> 5.9
+> 1.4
+> Kimi-K2
+> Direct Syntax-
+> Constrained
+> RAG
+> (Code)
+> RAG
+> (Docs)
+> Agent
+> (iFlow CLI)
+> 0
+> 2
+> 4
+> 6
+> 8
+> 10
+> 12
+> Pass@1 per 1k input tokens
+> 5.5
+> 12.3
+> 10.5
+> 3.5
+> 0.6
+> Qwen3-Coder
+> Direct Syntax-
+> Constrained
+> RAG
+> (Code)
+> RAG
+> (Docs)
+> Agent
+> (Codex CLI)
+> 0
+> 5
+> 10
+> 15
+> 20
+> Pass@1 per 1k input tokens
+> 8.7
+> 19.1
+> 21.2
+> 6.1
+> 0.2
+> GPT-5
+
+(a) Text-to-Code Task Direct Syntax-   
+
+> Constrained
+> RAG
+> (Code)
+> RAG
+> (Docs)
+> Agent
+> (iFlow CLI)
+> 0
+> 5
+> 10
+> 15
+> 20
+> 25
+> 30
+> 35
+> Pass@1 per 1k input tokens
+> 31.2
+> 12.7 11.8
+> 5.9
+> 1.8
+> Kimi-K2
+> Direct Syntax-
+> Constrained
+> RAG
+> (Code)
+> RAG
+> (Docs)
+> Agent
+> (iFlow CLI)
+> 0
+> 2
+> 4
+> 6
+> 8
+> 10
+> 12
+> Pass@1 per 1k input tokens  8.7
+> 11.1
+> 7.2
+> 3.3
+> 0.7
+> Qwen3-Coder
+> Direct Syntax-
+> Constrained
+> RAG
+> (Code)
+> RAG
+> (Docs)
+> Agent
+> (Codex CLI)
+> 0.0
+> 2.5
+> 5.0
+> 7.5
+> 10.0
+> 12.5
+> 15.0
+> 17.5
+> Pass@1 per 1k input tokens
+> 11.9
+> 13.4
+> 17.2
+> 5.2
+> 0.2
+> GPT-5
+
+(b) Code-to-Code Task 
+
+Figure 7: Efficiency analysis measured by Pass@1 per 1k input tokens . We compare Kimi-K2, Qwen3-Coder and GPT-5 of different methods on (a) Text-to-Code and (b) Code-to-Code tasks. While Agent methods achieve high accuracy, their efficiency score is significantly lower due to massive token consumption. In contrast, Syntax-Constrained and RAG (Code) methods often demonstrate higher efficiency. 
+
+Model HumanEval (Python) ClassEval (Python) 
+
+Pass Pass Func Main % # % # % # % #DeepSeek-V3 91.5 150 32.1 27 71.7 246 66.7 56 ERNIE-4.5 93.9 154 31.0 26 70.0 240 63.1 53 Kimi-K2 95.7 157 35.7 30 74.3 255 72.6 61 Qwen3 93.9 154 41.7 35 79.0 271 77.4 65 Qwen3-Coder 93.9 154 44.1 37 78.7 270 82.1 69 
+
+GPT-5 96.3 158 41.7 35 76.7 263 77.4 65 
+
+Table 8: Full results on the original Python versions of HumanEval and ClassEval benchmarks. All models utilize the Direct generation method. The symbol % denotes the pass rate (pass@1 or success rate), and # denotes the count of successful instances. Best results are highlighted in red . As shown in the table, the performance on Python is significantly higher compared to the Cangjie results, highlighting the substantial challenges posed by low-resource languages like Cangjie for LLMs. 
+
+17 Method Model HumanEval (Avg. Tokens) ClassEval (Avg. Tokens) 
+
+Input Output Total Input Output Total 
+
+Direct 
+
+DeepSeek-V3 212.9 121.5 334.4 795.8 517.6 1,313.5 
+
+ERNIE-4.5 251.4 240.1 491.4 943.8 993.1 1,936.9 
+
+Kimi-K2 209.5 128.1 337.6 782.9 620.9 1,403.8 
+
+Qwen3 214.4 150.5 364.8 797.7 845.4 1,643.1 
+
+Qwen3-Coder 214.4 163.7 378.0 797.7 1,019.1 1,816.8 
+
+GPT-5 209.7 271.5 481.3 778.4 1,367.5 2,145.9 Syntax-Constrained 
+
+DeepSeek-V3 2,550.9 135.4 2,686.3 3,133.8 590.7 3,724.5 
+
+ERNIE-4.5 2,940.4 310.6 3,251.0 3,632.8 844.8 4,477.6 
+
+Kimi-K2 2,520.5 142.3 2,662.8 3,093.9 543.9 3,637.8 
+
+Qwen3 2,568.4 201.7 2,770.1 3,151.7 714.5 3,866.2 
+
+Qwen3-Coder 2,568.4 206.1 2,774.5 3,151.7 1,002.1 4,153.8 
+
+GPT-5 2,539.7 255.6 2,795.3 3,108.4 1,208.9 4,317.3 RAG (Code) 
+
+DeepSeek-V3 907.3 116.6 1,023.9 2,118.7 522.0 2,640.6 
+
+ERNIE-4.5 1,047.7 229.9 1,277.6 2,462.1 1,035.5 3,497.6 
+
+Kimi-K2 896.5 127.4 1,023.9 2,062.2 657.6 2,719.9 
+
+Qwen3 915.0 132.7 1,047.6 2,081.7 953.5 3,035.2 
+
+Qwen3-Coder 915.0 155.1 1,070.1 2,081.7 965.2 3,046.9 
+
+GPT-5 896.8 230.5 1,127.3 2,055.5 1,246.9 3,302.4 RAG (Docs) 
+
+DeepSeek-V3 4,404.6 243.9 4,648.5 5,377.3 716.3 6,093.7 
+
+ERNIE-4.5 4,737.0 360.4 5,097.4 5,753.9 1,142.9 6,896.8 
+
+Kimi-K2 3,483.3 169.5 3,652.8 4,485.9 565.0 5,051.0 
+
+Qwen3 3,575.6 184.6 3,760.2 4,591.7 866.6 5,458.3 
+
+Qwen3-Coder 3,608.2 192.5 3,800.7 4,578.9 945.7 5,524.6 
+
+GPT-5 3,903.3 287.7 4,191.1 4,806.9 1,344.5 6,151.5 Agent 
+
+Kimi-K2 (iFlow CLI) 23,981.0 242.7 24,223.6 26,306.4 1,154.3 27,460.7 
+
+Qwen3-Coder (iFlow CLI) 35,752.9 365.0 36,117.8 34,831.2 1,334.5 36,165.8 
+
+Qwen3-Coder (Qwen Code CLI) 223,526.0 1,312.8 224,838.8 210,736.4 2,115.1 212,851.5 
+
+GPT-5 (Codex CLI) 388,428.0 3,316.6 391,744.7 612,463.8 5,737.2 618,201.0 
+
+Table 9: Full token usage statistics on C ANGJIE BENCH Text-to-Code task. We report the average Input (prompt), 
+
+Output (completion), and Total token counts per problem. 
+
+18 Method Model HumanEval (Avg. Tokens) ClassEval (Avg. Tokens) 
+
+Input Output Total Input Output Total 
+
+Direct 
+
+DeepSeek-V3 231.9 125.3 357.2 814.8 534.7 1,349.5 
+
+ERNIE-4.5 277.4 251.1 528.5 969.8 920.4 1,890.2 
+
+Kimi-K2 229.5 151.4 380.9 802.9 690.0 1,492.9 
+
+Qwen3 234.4 137.4 371.7 817.7 718.6 1,536.3 
+
+Qwen3-Coder 234.4 151.1 385.5 817.7 840.8 1,658.4 
+
+GPT-5 229.7 272.3 502.0 798.4 1,178.8 1,977.2 Syntax-Constrained 
+
+DeepSeek-V3 2,570.9 144.4 2,715.3 3,153.8 513.3 3,667.2 
+
+ERNIE-4.5 2,966.4 258.7 3,225.1 3,658.8 783.7 4,442.4 
+
+Kimi-K2 2,540.5 136.5 2,677.0 3,113.9 560.0 3,673.9 
+
+Qwen3 2,589.4 164.6 2,754.0 3,172.7 693.6 3,866.2 
+
+Qwen3-Coder 2,589.4 257.6 2,847.0 3,172.7 1,008.4 4,181.0 
+
+GPT-5 2,560.7 267.5 2,828.3 3,129.4 1,210.3 4,339.7 RAG (Code) 
+
+DeepSeek-V3 1,115.4 120.4 1,235.8 2,468.1 546.2 3,014.3 
+
+ERNIE-4.5 1,293.0 246.4 1,539.4 2,892.1 984.3 3,876.4 
+
+Kimi-K2 1,102.0 121.8 1,223.8 2,399.2 581.6 2,980.9 
+
+Qwen3 1,123.3 133.8 1,257.2 2,416.8 946.6 3,363.4 
+
+Qwen3-Coder 1,123.3 159.6 1,282.9 2,416.8 1,035.5 3,452.3 
+
+GPT-5 1,102.2 244.8 1,347.0 2,390.3 1,155.7 3,546.0 RAG (Docs) 
+
+DeepSeek-V3 4,606.3 240.4 4,846.7 5,587.5 723.0 6,310.5 
+
+ERNIE-4.5 4,979.5 406.1 5,385.6 6,134.7 1,136.2 7,270.9 
+
+Kimi-K2 3,727.4 158.3 3,885.8 4,824.9 574.9 5,399.8 
+
+Qwen3 3,811.3 176.8 3,988.1 4,971.9 723.5 5,695.5 
+
+Qwen3-Coder 3,712.4 182.2 3,894.6 4,876.9 972.3 5,849.2 
+
+GPT-5 4,126.8 304.1 4,430.9 5,206.6 1,321.7 6,528.3 Agent 
+
+Kimi-K2 (iFlow CLI) 22,209.9 283.3 22,493.2 22,549.4 1,126.9 23,676.3 
+
+Qwen3-Coder (iFlow CLI) 31,008.1 455.7 31,463.8 38,036.4 1,288.3 39,324.8 
+
+Qwen3-Coder (Qwen Code CLI) 252,853.4 1,312.9 254,166.3 232,396.0 2,165.1 234,561.1 
+
+GPT-5 (Codex CLI) 318,735.1 3,227.4 321,962.5 514,826.5 5,926.7 520,753.2 
+
+Table 10: Full token usage statistics on C ANGJIE BENCH Code-to-Code task. We report the average Input (prompt), 
+
+Output (completion), and Total token counts per problem. 
+
+Model HumanEval ClassEval Avg. 
+
+Pass@1 Pass@10 Pass@1 Pass@10 Pass@1 Pass@10 DeepSeek-V3 47.6 73.8 16.7 35.7 32.2 54.8 ERNIE-4.5 39.0 77.4 2.4 19.1 20.7 48.3 Kimi-K2 62.2 90.9 22.6 50.0 42.4 70.5 Qwen3 57.3 78.7 22.6 34.5 40.0 56.6 Qwen3-Coder 47.6 68.9 22.6 32.1 35.1 50.5 GPT-5 67.1 97.6 40.5 66.7 53.8 82.2 
+
+Table 11: Pass@10 results for the Syntax-Constrained method on the Text-to-Code task. All models show substantial gains, indicating that syntax errors can be effectively corrected with an expanded sampling budget. 
+
+19 Figure 8: Comparative implementation of the sumPositive function in Cangjie versus 11 other programming languages. 
+
+20 QuestionId:ClassEval_Cangjie-05 
+
+Prompt: 
+
+import std.collection.HashMap 
+
+import std.collection.ArrayList 
+
+import std.unicode.UnicodeStringExtension 
+
+class AutomaticGuitarSimulator { 
+
+/*
+
+This class is an automatic guitar simulator that can interpret and play based on the input guitar sheet music. 
+
+*/
+
+let play_text: String 
+
+public init(text: String) { 
+
+/*
+
+Initialize the score to be played 
+
+:param text:String, score to be played 
+
+*/
+
+this.play_text = text 
+
+}
+
+public func interpret(display!: Bool = false): ArrayList<HashMap<String, String>> { 
+
+/*
+
+Interpret the music score to be played 
+
+:param display:Bool, representing whether to print the interpreted score 
+
+:return: list of HashMap, The HashMap includes two fields, Chord and Tune, which are letters and numbers, 
+
+respectively. If the input is empty or contains only whitespace, an empty list is returned. 
+
+>>> context = AutomaticGuitarSimulator("C53231323 Em43231323 F43231323 G63231323") 
+
+>>> play_list = context.interpret(display: false) 
+
+[{'Chord': 'C', 'Tune': '53231323'}, {'Chord': 'Em', 'Tune': '43231323'}, {'Chord': 'F', 'Tune': '43231323'}, 
+
+{'Chord': 'G', 'Tune': '63231323'}] 
+
+*/
+
+}
+
+public func display(key: String, value: String): String { 
+
+/*
+
+Print out chord and play tune with following format: Normal Guitar Playing -- Chord: %s, Play Tune: %s 
+
+:param key:String, chord 
+
+:param value:String, play tune 
+
+:return: String 
+
+>>> context = AutomaticGuitarSimulator("C53231323 Em43231323 F43231323 G63231323") 
+
+>>> context.display("C", "53231323") 
+
+Normal Guitar Playing -- Chord: C, Play Tune: 53231323 
+
+*/
+
+}
+
+}
+
+Example of CANGJIEBENCH from ClassEval Figure 9: Example of C ANGJIE BENCH from ClassEval Example of CANGJIEBENCH from HumanEval 
+
+QuestionId:HumanEval_Cangjie-01 
+
+Prompt: 
+
+import std.collection.ArrayList 
+
+func separate_paren_groups(paren_string: String): ArrayList<String> { 
+
+/*
+
+Input to this function is a string containing multiple groups of nested parentheses. Your goal is to 
+
+separate those group into separate strings and return the list of those. 
+
+Separate groups are balanced (each open brace is properly closed) and not nested within each other 
+
+Ignore any spaces in the input string. 
+
+>>> separate_paren_groups('( ) (( )) (( )( ))') 
+
+['()', '(())', '(()())'] 
+
+*/
+
+Figure 10: Example of C ANGJIE BENCH from ClassEval 
+
+21 Prompt for Direct Generation on Text-to-Code Task 
+
+You are an expert assistant for the Cangjie programming language. 
+
+Write the complete code and wrap it in ```cangjie```. 
+
+Do not give any explanation. 
+
+---
+
+{cangjie_question} Figure 11: Prompt for Direct Generation on Text-to-Code Task Prompt for Direct Generation on Code-to-Code Task 
+
+You are an expert assistant for the Cangjie programming language. 
+
+Write the complete code and wrap it in ```cangjie```. 
+
+Do not give any explanation. 
+
+---
+
+This is the corresponding Python implementation code. 
+
+{python_code} 
+
+This is the Cangjie question. 
+
+{cangjie_question} 
+
+Figure 12: Prompt for Direct Generation on Code-to-Code Task Prompt for Syntax-Constrained Generation on Text-to-Code Task 
+
+You are an expert assistant for the Cangjie programming language. Please answer questions based on the 
+
+**syntax rules ** provided by the user. 
+
+Please adhere to the following principles: 
+
+1. **Prioritize explicit rules **: If the question is directly addressed in the provided syntax rules, answer 
+
+strictly according to those rules. 
+
+2. **Reasonable inference (only when necessary) **: If the question is not explicitly covered but can be 
+
+answered through **conservative and logically consistent analogy ** based on other programming languages' 
+
+syntax structures, naming conventions, or semantic patterns, you may attempt to answer. 
+
+3. **Keep answers concise and accurate **: Avoid redundant explanations. 
+
+4. **Import Statements **: This question code may not import the necessary packages required to resolve the 
+
+problem. If necessary, import the required modules at the top of the program. 
+
+Please read the specific syntax rules provided by the user before handling subsequent questions. And write 
+
+the complete code and wrap it in ```cangjie```. 
+
+---
+
+## Syntax Rules 
+
+Below are the general syntax rules of the Cangjie language: 
+
+{syntax_rule} 
+
+---
+
+## Question 
+
+{cangjie_question} 
+
+Figure 13: Prompt for Syntax-Constrained Generation on Text-to-Code Task 
+
+22 Prompt for Syntax-Constrained Generation on Code-to-Code Task 
+
+You are an expert assistant for the Cangjie programming language. Please answer questions based on the 
+
+**syntax rules ** provided by the user. 
+
+Please adhere to the following principles: 
+
+1. **Prioritize explicit rules **: If the question is directly addressed in the provided syntax rules, answer 
+
+strictly according to those rules. 
+
+2. **Reasonable inference (only when necessary) **: If the question is not explicitly covered but can be 
+
+answered through **conservative and logically consistent analogy ** based on other programming languages' 
+
+syntax structures, naming conventions, or semantic patterns, you may attempt to answer. 
+
+3. **Keep answers concise and accurate **: Avoid redundant explanations. 
+
+4. **Import Statements **: This question code may not import the necessary packages required to resolve the 
+
+problem. If necessary, import the required modules at the top of the program. 
+
+Please read the specific syntax rules provided by the user before handling subsequent questions. And write 
+
+the complete code and wrap it in ```cangjie```. 
+
+---
+
+## Syntax Rules 
+
+Below are the general syntax rules of the Cangjie language: 
+
+{syntax_rule} 
+
+---
+
+## Question 
+
+This is the corresponding Python implementation code. 
+
+{python_code} 
+
+This is the Cangjie question. 
+
+{cangjie_question} Figure 14: Prompt for Syntax-Constrained Generation on Code-to-Code Task Prompt for RAG (Code) o n Text-to-Code Task 
+
+You are an expert assistant for the Cangjie programming language. 
+
+Write the complete code and wrap it in ```cangjie```. 
+
+Do not give any explanation. 
+
+---
+
+## Relative Cangjie Code 
+
+{relative_cangjie_code} 
+
+## Question 
+
+{cangjie_question} 
+
+Figure 15: Prompt for RAG (Code) on Text-to-Code Task 
+
+23 Prompt for RAG (Code) on Code-to-Code Task 
+
+You are an expert assistant for the Cangjie programming language. 
+
+Write the complete code and wrap it in ```cangjie```. 
+
+Do not give any explanation. 
+
+---
+
+## Relative Cangjie Code 
+
+{relative_cangjie_code} 
+
+## Question: 
+
+This is the corresponding Python implementation code. 
+
+{python_code} 
+
+This is the Cangjie question. 
+
+{cangjie_question} Figure 16: Prompt for RAG (Code) on Code-to-Code Task Prompt for RAG ( Docs) on Text-to-Code Task 
+
+You are an expert assistant for the Cangjie programming language. 
+
+Write the complete code and wrap it in ```cangjie```. 
+
+Do not give any explanation. 
+
+---
+
+## Relative Document 
+
+{relative_doc} 
+
+## Question 
+
+{cangjie_question} 
+
+Figure 17: Prompt for RAG (Docs) on Text-to-Code Task 
+
+24 Prompt for RAG ( Docs) on Code-to-Code Task 
+
+You are an expert assistant for the Cangjie programming language. 
+
+Write the complete code and wrap it in ```cangjie```. 
+
+Do not give any explanation. 
+
+---
+
+## Relative Document 
+
+{relative_doc} 
+
+## Question: 
+
+This is the corresponding Python implementation code. 
+
+{python_code} 
+
+This is the Cangjie question. 
+
+{cangjie_question} Figure 18: Prompt for RAG (Docs) on Code-to-Code Task Prompt for Agent on Text-to-Code Task 
+
+You must use Cangjie to finish the code. 
+
+Even though you are not familiar with Cangjie, you can use `ls`, `cat`, `grep` or other command in 
+
+`CangjieCorpus/` directory to learn it. 
+
+Write the complete code directly and wrap it in ```cangjie```. 
+
+Note: 
+
+1. Use commands to learn Cangjie in ` CangjieCorpus /` directory first. 
+
+2. Only output the solution code 。
+
+3. Do not write test code. 
+
+4. Do not write into a file. 
+
+---
+
+{cangjie_question} 
+
+Figure 19: Prompt for Agent on Text-to-Code Task 
+
+25 Prompt for Agent on Code-to-Code Task 
+
+You must use Cangjie to finish the code. 
+
+Even though you are not familiar with Cangjie, you can use `ls`, `cat`, `grep` or other command in 
+
+`CangjieCorpus/` directory to learn it. 
+
+Write the complete code directly and wrap it in ```cangjie```. 
+
+Note: 
+
+1. Use commands to learn Cangjie in `CangjieCorpus/` directory first. 
+
+2. Only output the solution code 。
+
+3. Do not write test code. 
+
+4. Do not write into a file. 
+
+---
+
+This is the corresponding Python implementation code. 
+
+{python_code} 
+
+This is the Cangjie question. 
+
+{cangjie_question} Figure 20: Prompt for Agent on Code-to-Code Task 
+
+26

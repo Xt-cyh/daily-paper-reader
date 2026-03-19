@@ -1,0 +1,657 @@
+Title: Large language models for optical network O&M: Agent-embedded workflow for automation
+
+URL Source: https://arxiv.org/pdf/2603.11828v1
+
+Published Time: Fri, 13 Mar 2026 00:51:06 GMT
+
+Number of Pages: 14
+
+Markdown Content:
+> Research Article 1
+
+# Large language models for optical network O&M: Agent-embedded workflow for automation 
+
+## SHENGNAN LI1, Y IDI WANG 1, F UBIN WANG 1, Y UJIA YANG 1, Y AO ZHANG 1, Y UCHEN SONG 1, X IAOTIAN 
+
+## JIANG 2, Y UE PANG 3, M IN ZHANG 1, AND DANSHI WANG 1,* 
+
+> 1State Key Laboratory of Information Photonics and Optical Communications, Beijing University of Posts and Telecommunications, Beijing 100876, China
+> 2China Telecom Research Institute, Beijing, 102209, China
+> 3China Telecom Cloud Network Operating System R&D Center, Beijing, 102299, China
+> *danshi_wang@bupt.edu.cn Compiled March 13, 2026
+
+With the continuous expansion of optical networks and the increasing diversity of services, existing operation and maintenance (O&M) approaches are increasingly challenged to meet the rising demands for intelligence and efficiency. Large language models (LLMs), endowed with advanced semantic understand-ing and contextual analysis capabilities, are emerging as a promising enabler for intelligent optical network O&M. Recent studies have demonstrated the feasibility of applying LLMs to optical network management, marking an important step toward intelligent automation. However, systematic investigations into how LLMs can be effectively integrated into existing O&M workflows remain limited. This paper addresses this gap by drawing inspiration from best practices in real-world O&M workflows and systematically iden-tifying scenarios that are well suited for LLM integration. We highlight that agent-based design is key to improving the executability of tasks, and we propose a multi-Agent collaborative O&M architecture that in-tegrates LLM capabilities with existing O&M tools. The proposed architecture leverages core LLM-related technologies including prompt engineering and tool invocation, to build Agent solutions targeting key tasks such as optical channel management, performance optimization, and fault management. This work presents a conceptual framework for embedding LLM-based Agents into optical network O&M workflows, forming agentized processes that demonstrate the feasibility of LLM-assisted task execution and lay the groundwork for future autonomous O&M systems featuring closed-loop perception, decision-making, and action. 
+
+http://dx.doi.org/10.1364/ao.XX.XXXXXX 
+
+1. INTRODUCTION 
+
+Optical networks, with their advantages in high capacity, long-distance transmission, and strong reliability, play an irreplace-able role in high-speed data transport across regions and have become the cornerstone of modern information infrastructure. To meet the growing demands of emerging applications such as the Internet of Things (IoT), ultra-high-definition video, and intelligent computing, the capacity and scale of optical networks continue to expand rapidly. Ensuring high-reliability and loss-less transmission in such large-scale networks requires highly efficient, flexible, and intelligent operations and maintenance (O&M) capabilities [1]. Currently, most telecom operators and cloud service providers rely on a network management system (NMS)-based O&M framework [ 2 ]. Through NMS, a visualized topology of the deployed network can be constructed, control commands can be issued to optical network elements via integrated con-trollers, and device status and performance data can be effi-ciently retrieved. When optical network faults occur, related alarms are displayed in a centralized interface. This framework supports a variety of essential O&M tasks, including power equalization, performance monitoring, and fault localization. However, today’s O&M processes still heavily depend on man-ual operations. For example, after alarms are triggered by device faults, operators are responsible for correlating alarm relation-ships, analyzing performance indicators via NMS, identifying root causes, and communicating with field engineers via text or voice to complete fault repairs. Similarly, when transmission capacity becomes insufficient, newly added channels are man-ually configured based on operator experience. To standardize manual operations and reduce human errors, detailed methods of procedure (MOP) and standard operating procedure (SOP) are typically followed during task execution. Nonetheless, with the rapid expansion of network scale and complexity, manual and human-based O&M modes are facing growing limitations  
+
+> arXiv:2603.11828v1 [physics.optics] 12 Mar 2026 Research Article 2
+
+in efficiency and scalability. There is an urgent industry-wide need to enhance automation in O&M processes. Over the past decade, the application of artificial intelligence (AI) to optical network O&M has attracted increasing attention [3]. Numerous studies have demonstrated that machine learning and deep learning techniques have strong potential in tasks such as fault prediction, anomaly detection, and quality of transmis-sion (QoT) estimation [ 4 –6]. While effective within specific tasks, traditional AI models are typically designed for single-purpose applications and lack generalizability. They depend on manu-ally defined input parameters and cannot perceive contextual information or interpret multi-round instructions. Moreover, they are incapable of performing task-level planning or tool orchestration, which limits their ability to achieve cross-task collaboration and autonomous decision-making. These limita-tions create a bottleneck for advancing the overall intelligence of network O&M systems. In recent years, large language models (LLMs) have made groundbreaking advances in natural language understanding, content generation, and natural language interaction. These capabilities offer new opportunities to build higher-level intelli-gent O&M systems for optical networks [ 7 –10 ]. Notably, LLM-powered AI Agents are capable of interpreting complex natu-ral language instructions, decomposing them into executable tasks, and autonomously invoking tools to complete operations, thereby eliminating the need for human-in-the-loop orchestra-tion [ 11 ]. This opens up the potential for significantly improving automation in optical network operations [ 12 – 16 ], positioning LLMs as a key enabling technology for future autonomous opti-cal networks. A growing body of research has begun exploring the integration of LLMs into optical network O&M scenarios, in-vestigating their potential in tasks such as root cause alarm anal-ysis, command generation, and configuration recommendation [ 17 –24 ]. These studies provide early evidence of LLMs’ ability to break away from human-dominated operational workflows. However, how to effectively leverage existing O&M paradigms to improve operational efficiency when deploying LLMs at scale in optical networks has not been sufficiently explored. This paper explores the application prospects of LLMs in large-scale optical network O&M, with the goal of identifying representative use cases, outlining feasible architecture designs, and examining potential implementation pathways. Building upon existing operational frameworks, we advocate embedding LLM-based Agents into best-practice O&M workflows, thereby forming Agent-embedded workflows that enhance automation and decision-making while maintaining compatibility with cur-rent operational paradigms. First, we provide a system-level review of key O&M scenarios where LLMs can offer the most value, grounded in operational practices. We then propose a multi-Agent architecture tailored for optical channel provision-ing, network performance optimization, and fault management, detailing the functional responsibilities and workflows of each Agent. Finally, the major challenges of deploying LLMs in real-world networks are discussed, including data availability, high-fidelity digital twin (DT) [ 25 ], and security compliance. It is expected that this work can provide useful insights and a con-ceptual foundation for developing agentized workflows that bridge current O&M practices with emerging LLM-driven au-tomation. The rest of the paper is organized as follows: Section 2 presents an overview of the physical, control, and application layers of optical networks and analyzes the pain points of cur-rent O&M practices. Section 3 discusses the core LLM-related technologies that enhance automation in optical network op-erations. Section 4 introduces a multi-Agent architecture and details the design of intelligent Agents for key O&M scenarios. Section 5 outlines the major deployment challenges of LLMs in real-world optical networks. Section 6 concludes the paper. 
+
+2. OVERVIEW OF CURRENT OPTICAL NETWORK O&M 
+
+In this section, we presents an overview of the three-layer archi-tecture of optical networks, followed by a discussion of three representative O&M scenarios. 
+
+> A. Three-Layer Architecture of Optical Networks
+
+An optical network architecture typically consists of three layers: the physical layer, the control layer, and the application layer, as illustrated in Fig. 1. 
+
+In the physical layer: optical network elements (NEs) are interconnected via optical fibers to form the network topology, as shown in Fig. 1(c). The core hardware components of NE include the local control board, service board, and optical-layer board. The local control board communicates with other boards within the NE, issuing control commands and collecting mon-itoring data. The service board interfaces with switches and routers to inject service traffic into the optical network using standard optical wavelengths. The optical-layer board pro-vides essential functions such as optical amplification, multiplex-ing/demultiplexing, optical switching, and optical protection, enabling long-haul, high-capacity transmission. Given the typical lifecycle of an optical network exceeds 20 years, the network scale expands continuously over time. As a result, device from different vendors and technology gener-ations often coexists within the same network, forming a het-erogeneous and complex device environment. Additionally, the fiber link structure becomes increasingly intricate, with highly entangled service connectivity and diverse fault scenarios. To ensure manageability, each optical NE is equipped with a com-prehensive local management system. These NEs communicate with the NMS via protocols such as OSPF, enabling centralized control. Local command-line interface (CLI) or graphical user interface (GUI) allows operators to configure device functional-ities and query performance, alarms, and logs. In the event of NMS failure, local control capabilities are retained. Simple network management protocol (SNMP) has long been the mainstream northbound management protocol, supporting efficient and reliable monitoring and configuration by the NMS. With the development of software-defined networking (SDN), northbound interfaces are evolving towards protocols such as NETCONF and gRPC [ 26 – 28 ]. Combined with YANG mod-els, this enables standardized device modeling and fine-grained telemetry reporting at the second level or finer, facilitating pre-cise network awareness and optimization [29]. 
+
+In the control layer: the architecture typically consists of database, NMS, and controller, as illustrated in Fig. 1(b). Acentralized database ingests performance, status, alarm, and log data from physical-layer devices and stores information about network topology and service mappings. The database pro-vides interfaces to the NMS, SDN controller, and DT. The NMS, as the traditional centralized platform, has long played a key role in unified device management, configuration provisioning, performance monitoring, and fault handling. It offers a uni-fied graphical interface, particularly useful in multi-vendor and multi-technology environments. In recent years, SDN controllers have been introduced into the control layer and are gradually Research Article 3Physical Layer 
+
+Application Layer 
+
+Control Layer                                                                                        
+
+> Controller
+> Digital twin
+> Database
+> •Optical channel add/drop
+> •Performance optimization
+> •Fault management
+> Data, alarm Control, subscription
+> OA WSS Mux/ Demux OLP
+> Optical fiber
+> Optical channel
+> •Alarm
+> •Logs
+> •Performance
+> •Status
+> Network management system
+> •Configuration management
+> •Performance management
+> •Alarm management
+> •Security management
+> REST API Strategy
+> Component
+> •Local control board •Servi ce board
+> •Optical layer board:
+> Local Management
+> •CLI /GUI
+> •SNMP /NETCONF /gRPC /YANG
+> •OSPF /GMPLS
+> •Topology aware
+> •OCH establishment
+> •Configuration
+> •Data subscription
+> •QoT prediction
+> Strategy preview
+> Feedback
+> •Optical network mirroring model
+> Optical network O&M
+> üRoot cause identification
+> üFault prediction
+> üPower profile equalization
+> üGSNR maximization
+> üWavelength selection and QoT estimation
+> üWSS configuration
+> Optical
+> network element
+> (a)
+> (b)
+> (c)
+
+Fig. 1. Three-layer architecture of an optical network. (a) The physical layer comprises optical network elements and optical fibers, where each network element includes both hardware components and a local management system. (b) The control layer consists of the network management system (NMS), SDN controller, and databases. (c) The application layer encompasses the digital twin of the optical network and O&M applications, including optical channel management, performance optimization, and fault manage-ment. replacing parts of the NMS’s control functions. The goal is to support automated topology discovery, service deployment, and network optimization through centralized intelligence. Con-trollers typically obtain real-time telemetry data from devices via subscription mechanisms, thus creating a complete and dy-namic network view that provides a solid data foundation for DTs. In modern optical networks operated by cloud service providers, open and disaggregated architectures have been widely adopted [ 30 ]. Vendor-developed SDN controllers are now capable of managing equipment from multiple suppliers, increasing deployment flexibility and, to some extent, reducing overall equipment costs [ 31 ]. Driven by this trend, controller development has evolved beyond basic NMS-equivalent func-tions to support automatic topology construction and service provisioning, further expanding the capabilities of SDN-based network control. 
+
+In the application layer: DT is constructed to enable in-telligent optical network O&M, as depicted in Fig. 1(a). DT technology, by accurately sensing physical-layer parameters and building high-fidelity mirror models, is expected to provide essential functions such as QoT estimation, optimization strat-egy verification, and fault analysis [ 32 , 33 ]. It has become a critical enabler for the intelligent evolution of optical networks. Recent research in both academia and industry has focused on improving the accuracy of DT models by calibrating the physical parameters of fibers and optical amplifiers. In current opera-tional practices, DTs are primarily used for QoT estimation prior to configuration changes in live networks, effectively supporting operator decision-making and improving efficiency. Neverthe-less, the end-to-end O&M process of optical networks remains highly reliant on manual intervention and human coordination, limiting the level of automation. In general, optical network O&M tasks can be categorized into three classes: optical channel management (i.e., add/drop), performance optimization, and fault management. The follow-ing section provide an overview of the current practices and main pain points of these three typical O&M scenarios. 
+
+B. O&M Scenarios in Optical Networks 
+
+In optical channel management: when increasing service de-mands require additional optical channels, operators must first evaluate resource availability between the relevant nodes. This is followed by routing and wavelength assignment (RWA) com-putation and QoT estimation to determine the configurations for service and optical-layer boards at each node. To minimize the impact on live traffic, such operations are typically conducted during off-peak night-time windows. Configuration commands are manually issued via the NMS, and the QoT of the new opti-cal channels must be verified. Operators must also ensure that existing channels remain unaffected. The entire process typi-cally takes several hours and is prone to human error. Optical channel deletion is considered a high-risk operation due to the possibility of accidental deletion of unrelated channels and is also scheduled during night-time maintenance windows. 
+
+In performance optimization: power equalization is one of the most common objectives. Optical power directly affects the optical signal-to-noise ratio (OSNR) and contributes to the accumulation of nonlinear Kerr effects, making it critical to trans-mission quality. Power flattening essentially ensures uniform Research Article 4
+
+performance across channels and is especially important in op-tical systems employing optical multiplex section protection (OMSP). When minor fiber degradation occurs without trigger-ing protection switching, significantly lower power in one chan-nel may reduce its OSNR below the threshold, causing persis-tent service disruption. In current operation practice, engineers typically perform power flattening checks periodically, often every few days in large-scale backbone networks, to ensure that all channels within an optical multiplex section (OMS) remain within a predefined flatness tolerance. Based on optical channel monitor (OCM) measurements, when deviations are detected, engineers manually adjust the variable optical attenuator (VOA) settings of wavelength selective switches (WSS)-equipped nodes, checking and correcting power levels segment by segment. For each wavelength, the adjustment and verification cycle generally takes several minutes, as engineers must coordinate between the NMS interface and on-site monitoring tools. For multi-span systems, downstream OMS segments often require additional corrections after upstream tuning, further increasing operational complexity. The process is labor-intensive, time-consuming, and vulnerable to misconfiguration that could interrupt services. Even after power flattening is completed, the system may still not achieve optimal performance. A more advanced objec-tive is to maximize the generalized signal-to-noise ratio (GSNR) of the optical transmission system. This process involves fre-quent interactions between GSNR optimization algorithms and the DT platform to identify the theoretical best configuration. Based on the feedback from live network performance after each configuration update, further parameter adjustments are made dynamically. This closed-loop optimization relies heavily on both model computation and real-time feedback, significantly increasing engineering complexity. 
+
+In fault management: the primary goal is to accurately locate the root cause of faults and take corrective actions as quickly as possible. In practice, a single fault can trigger a large number of correlated alarms, requiring operators to possess both deep domain knowledge and a comprehensive understanding of net-work topology. Research efforts in recent years have focused on alarm correlation and root cause analysis to enhance fault localization efficiency. LLMs have shown promise in extracting root causes from complex alarm patterns. During the recovery phase, field technicians and network operation engineers must collaborate for physical repairs. At present, fault information is often conveyed verbally, which increases the risk of communi-cation and understanding errors that can delay repairs or even cause secondary fault. Another critical aspect of fault manage-ment is fault prediction. By detecting potential risks through predictive algorithms before a fault occurs, operators can proac-tively perform planned hardware replacements or implement other preventive measures to eliminate the root cause. In large-scale networks, timely and effective fault prediction requires the analysis of vast volumes of monitoring data in conjunction with the real-time interpretation of outputs from various predictive models. It is evident that such a task cannot be accomplished efficiently through manual efforts alone. Once the optical network begins carrying live traffic, it enters a long-term O&M phase that continues until decommissioning. This phase accounts for over 95% of the network’s lifecycle, and its level of automation directly determines the overall intelli-gence of the network. However, current O&M processes remain heavily dependent on manual intervention, resulting in ineffi-ciencies and a high rate of human errors. These challenges make it increasingly difficult to cope with the rapid growth in net-work scale and complexity. To this end, introducing advanced decision-making mechanisms based on LLMs and efficiently leveraging existing AI algorithms for optical network operations has become a key pathway toward building a closed-loop in-telligent O&M system with sensing, decision, and execution capabilities. Therefore, the technique of AI is essential for ad-vancing optical networks toward high-level autonomy. 
+
+> C. LLMs for Optical Network O&M Automation
+
+The integration of AI technologies into optical networks has evolved in parallel with advances in the AI field itself. Tradi-tional ML methods are lightweight and cost-effective to train, offering high precision and efficiency in solving well-defined network tasks. With the emergence of LLMs, which demonstrate exceptional capabilities in intent understanding, task decompo-sition, tool orchestration, and content generation, a promising path is emerging: building an autonomous operation system where LLMs serve as the intelligent control core, while conven-tional O&M methods as robust execution tools. This architecture holds strong potential for enabling higher levels of automation in optical networks. The application of LLMs in optical network automation is rapidly evolving. Existing studies have explored various high-value O&M scenarios such as alarm analysis [ 17 , 34 ], log anal-ysis [ 19 ], device configuration and performance optimization [ 8, 9, 24 ]. To ensure sufficient contextual analysis and intent un-derstanding capabilities, most studies adopt large-scale models from mainstream series such as GPT and LLaMA. Furthermore, [ 8] addresses data security and privacy concerns by deploying local LLMs to build AI Agents capable of executing multiple O&M tasks across the network lifecycle, providing a valuable example of matching model size with task complexity. Building upon these initial explorations, the next step is to move beyond function-level demonstrations and explore how LLMs can be effectively embedded into existing O&M work-flows to enhance automation and decision-making. Instead of redesigning the O&M framework from scratch, it is more feasi-ble to build upon existing best-practice operational workflows and gradually evolve them toward LLM-driven architectures. In this way, LLMs can function as the central intelligence coordinat-ing perception, analysis, and execution, ultimately improving operational efficiency and paving the way for more autonomous network management. In the early stages of optical network O&M, workflows were almost entirely manual, as illustrated in Fig. 2, where engineers had to consult documentation and communicate operational information through phone calls or other human-mediated chan-nels. The current stage represents a semi-automated workflow, where the introduction of O&M management platforms and analytical tools has significantly improved overall operational efficiency. This well-established workflow, refined through years of operational experience, ensures procedural standardization and system reliability. Therefore, when introducing Agents to further enhance O&M efficiency, we advocate embedding them into the existing mature workflow rather than replacing it. The next stage of evolution will lead toward agentic workflows, where Agents autonomously orchestrate tasks and collaborate dynamically with other Agents based on network conditions. In this paper, our focus is on the Agent-embedded workflow, which serves as a key transitional step toward fully autonomous O&M. Research Article 5Manual operations Semi -automatic workflow Agent -embedded workflow Agentic workflow         
+
+> Alarm generation
+> Alert
+> notification
+> Decision -making
+> Complex
+> diagnosis
+> Alarm generation
+> Alert
+> notification
+> Decision -making
+> Complex
+> diagnosis
+> Agent 1Agent 2Agent 3
+> Tool call
+
+Fig. 2. Evolution of optical network O&M workflows from manual operations to fully agentic workflows. Prompt 
+
+Agent Tool 
+
+RAG 
+
+Memory 
+
+Planning/Workflow                                                    
+
+> Hierarchical design System level prompt
+> User level prompt
+> Character settings
+> Major function Task instructions
+> Format constraints
+> Few -shot, one -shot
+> Additional Tips Information positioning
+> Interactive request
+> Sub -agent -1
+> Main -agent
+> Agent =
+> LLM + Planning/Workflow + Memory +
+> Tool + Prompt + RAG + Feedback
+> User input →Retrieve relevant knowledge →
+> Generate answer based on retrieve content
+> User input →Prompt modification →LLM output
+> Construction of
+> knowledge base
+> Chunking
+> Embedding
+> Storage
+> Data Base
+> Webpage
+> Document
+> Encode user input Similarity retrieval
+> Top -k knowledge LLM Output
+> Planning: Generate or adjust action
+> sequences in real -time based on changes in
+> the environment or goals .
+> CoT, ReAct
+> Workflow :Pre defined fixed execution order.
+> User input →Planning →Step1 ，
+> Step2… →execute →LLM Output
+> Method:
+> User input →Workflow(Step1 ，Step2…)
+> →execute →LLM Output
+> DAG Method:
+> User input →Intention understanding →Call
+> tools →Obtain results →LLM Output
+> Algorithm Model Data base API Search API
+> User input →LLM Output →User input
+> →Combine memory →LLM Output
+> Short -term memory Long -term memory
+> Working Memory Structured memory Sub -agent -2Sub -agent -n
+
+…
+
+Fig. 3. Key enabling technologies for LLM-based solutions. The framework includes six core techniques—Prompt Engineering, RAG, Planning/Workflow, Tool Integration, and Memory—that collectively support the construction of robust and adaptable AI Agents in domain-specific scenarios. 
+
+3. KEY TECHNOLOGIES FOR LLM DEPLOYMENT IN OP-TICAL NETWORKS 
+
+With the rapid advancement of AI, LLMs have emerged as a sig-nificant milestone in natural language processing. Leveraging their powerful capabilities in text generation and understanding, LLMs are transforming how we think and solve complex prob-lems. However, developing a optical network domain-adapted and reliable LLM-based solution remains a challenging task. From basic prompt engineering [ 35 ] to the orchestration of multi-Agent systems [ 36 ], a variety of critical technologies are involved. This chapter provides an overview of these enabling technolo-gies and clarifies their roles in supporting the integration of LLMs into optical network O&M workflows. Building an effective domain-specific LLM system requires efforts in two main directions: enhancing the base model’s capa-bilities, and developing robust supporting frameworks. The first direction includes fine-tuning techniques such as supervised fine-tuning (SFT) [ 37 ], reinforcement learning with human feed-back (RLHF) [ 38 ], and reinforcement fine-tuning (ReFT) [ 39 ], as well as scaling model parameters and pretraining data. How-ever, training or fine-tuning a domain-specific LLM from scratch is costly and often disproportionate to the practical benefits. By contrast, a more cost-effective approach is to build on top of powerful foundation models—such as the GPT series [ 40 ] or DeepSeek series [ 41 ]—through complementary techniques like prompt design and retrieval-augmented generation (RAG) [ 42 ]. Therefore, in this context, we focus on how to adapt general-purpose LLMs to domain-specific tasks using auxiliary tech-niques, without modifying the underlying model parameters. The development of an LLM-based system typically involves six core components: prompt design, RAG, planning and work-flow, tool integration, memory mechanisms, and Agent construc-tion, as illustrated in Fig. 3. These components are illustrated in detail below. Prompting is one of the earliest and most widely used tech-niques for improving LLM performance, which involves craft-ing input instructions to guide the model toward generating task-specific outputs. Prompts can be categorized into system-level and user-level prompts. The former defines global behav-Research Article 6
+
+ioral norms that persist throughout the session, while the latter is task-specific and often highly specialized. Functionally, a well-designed prompt typically includes three elements: role assignment, task instruction, and output formatting. Role assign-ment activates the model’s domain knowledge (e.g., "You are a network operations expert"), often by leveraging patterns seen during pretraining. Task instructions provide a detailed descrip-tion of the objectives and required operations, and formatting constraints ensure outputs meet structural expectations. Addi-tionally, prompts may include optional tips such as few-shot examples, information localization hints, or interaction strate-gies (e.g., "Ask the user for clarification if needed") to improve robustness and interactivity. RAG is one of the most effective methods for extending an LLM’s domain-specific knowledge. Its core idea is to retrieve relevant information from external sources and condition the model’s response on that content. The process involves con-structing a knowledge base by chunking, embedding, and vec-torizing documents (from databases, files, web content, etc.). When a user query arrives, it is also embedded and compared with the knowledge base to retrieve the top-k relevant entries [17 ], which are then inserted into the prompt to guide the LLM’s response. Planning [ 43 ] and workflow [ 44 ] are two key methods for organizing complex tasks. Planning emphasizes the model’s structured reasoning process, involving task decomposition, in-tent interpretation, and action sequencing. To enhance this capa-bility, strategies such as Chain-of-Thought (CoT) prompting [ 45 ]and ReAct [46] are often employed to guide the model through intermediate reasoning steps in a more interpretable and reliable manner. In contrast, workflows are deterministic and structured, defined in advance as directed acyclic graphs (DAGs) [ 47 ] to ensure stability and correctness. While planning offers flexibility and adaptability, workflows provide robustness for well-defined and repetitive tasks. While LLMs are primarily language models, many tasks re-quire interacting with external systems. Tools provide the LLM with operational capabilities [ 48 ], functioning as the “hands and feet” of the model. These tools include algorithms, APIs (for databases, search engines, network management systems), and domain-specific plugins, enabling the LLM to execute real-world actions beyond text generation. Memory mechanisms is essential for maintaining context in multi-turn interactions [ 49 ]. Depending on the design, memory may include short-term memory such as recent inputs, long-term memory that stores persistent knowledge, working mem-ory used for task-specific context, and structured memory that contains organized representations. Memory systems are critical for coherent reasoning and task continuity. The Agent is a central abstraction that encapsulates the afore-mentioned technologies into a coherent unit. An Agent may include prompts, tools, RAG modules, planning workflows, and memory. Agents are typically divided into two roles: a supervisor Agent that manages user interactions and task dele-gation, and sub-Agents that execute specific domain tasks. Each sub-Agent integrates its own tools and workflows to carry out specialized responsibilities. With all these components, an LLM-based system can achieve end-to-end task automation. The runtime process unfolds as follows: user input is first processed with prompts and sent to the Supervisor Agent, which interprets intent and decomposes the task into sub-tasks, as illustrated in Fig. 4. It then dispatches each task to the corresponding sub-Agent in sequence. Each sub-Agent leverages its internal prompt, tools, and knowledge to generate an answer. If the result is satisfactory, it proceeds to the next task; otherwise, it revises or retries. After all tasks are completed, the Supervisor Agent compiles the results into a final output. The technologies introduced in this chapter form a general-purpose, multi-Agent LLM framework. In the next chapter, we present example applications of this architecture in optical network operation scenarios, highlighting its potential use in automating key O&M tasks Supervisor -agent LLM       
+
+> Sub -Agent -1
+> User input Prompt
+> Call Sub -Agent -1
+> to do Step1
+> Planning: Step1 →Step2 →Step3
+> Sub -Agent -2
+> Sub -Agent -3
+> With Memory
+> Based on
+> Workflow
+> Task solving
+> Prompt
+> Call Tools
+> RAG
+> Call Sub -Agent -2
+> Call Sub -Agent -3
+> time axis
+> Summarize
+> and output
+> Feedback
+> Feedback
+> Feedback
+
+Fig. 4. Execution workflow of an LLM-based multi-Agent system. The Supervisor Agent interprets the user intent and coordinates subtasks among multiple specialized Sub-Agents, each utilizing tools such as prompt templates, RAG, and exter-nal APIs. The process iteratively refines the response until the final result is delivered. 
+
+4. LLM-BASED AI-AGENT FOR OPTICAL NETWORK OP-ERATION AND MAINTENANCE 
+
+Although O&M tasks in optical networks can be broadly cate-gorized into three typical classes: optical channel management, performance optimization, and fault management, each cate-gory encompasses a wide range of complex sub-tasks. To sim-plify Agent design and improve task execution efficiency, it is necessary to assign dedicated sub-Agents to each task category. Moreover, since these tasks are often interrelated in practice (e.g., channel addition typically requires subsequent performance tun-ing), it is essential to establish coordination mechanisms among sub-Agents. Given that multiple sub-Agents may act upon the same op-tical network simultaneously, a centralized coordination mech-anism is required to prevent operational conflicts and ensure global network stability. To this end, a Supervisor Agent is introduced to orchestrate the execution of all sub-Agents and serve as the unified interface for user interaction. Based on the actual workflow of O&M in current networks, we propose a multi-Agent architecture tailored to diverse O&M scenarios. 
+
+A. Multi-Agent Architecture for Optical Network O&M 
+
+The proposed multi-Agent cooperative O&M framework is struc-tured into three logical layers: the Interaction Layer, the Sub-Agent Layer, and the Functional Layer, as shown in Fig. 5. The Interaction Layer includes interactions between the Su-pervisor Agent and both human operators and sub-Agents. Al-though the goal of introducing LLMs and Agent-based systems Research Article 7Supervisor Agent                                                           
+
+> Fault Management Agent Optical Channel Management Agent Optical Network Optimization Agent
+> Sub -Agent Layer  Interaction  Layer
+> Detects, locates, and responds to fiber
+> and equipment failures to maintain
+> network reliability .
+> Functional  Layer
+> Description:
+> Keyword s:
+> Alarm analysis, fault localization, predictive
+> diagnostics
+> Risk assessment based on digital twins
+> Central coordinator that interprets user intent, assigns tasks,
+> and synchronizes Agent collaboration .
+> Operator
+> Description:
+> Keyword s:
+> Handles provisioning and deletion of
+> optical channels based on bandwidth
+> demands and routing constraints .
+> Instructions
+> &
+> Agent Responses Task Assignment
+> &
+> Coordination
+> RWA, QoT estimation, channel provisioning
+> Description:
+> Keyword s:
+> Performs performance flattening and
+> configuration tuning to ensure optical
+> network stability and maximize capacity .
+> Power equalization, GSNR optimization
+> Optical Channel Toolkit
+> •RWA Solver •QoT Estimator
+> •Topology &Inventory Query API
+> •Power Monitor
+> •Provisioning Risk Checker
+> Performance Tuning Engine
+> •Configure Simulator
+> •Config Control Module
+> •Change Impact Predictor
+> Fault Process Module
+> •Alarm Correlation Engine
+> •Device Status Query •Fault Rule base
+> •Field Repair Dispatcher
+
+Fig. 5. Multi-Agent collaborative architecture for optical network operations and maintenance. The interaction layer includes bidirectional communication between human operators and the Supervisor Agent, as well as between the Supervisor Agent and task-specific Sub-Agents. The Sub-Agent layer includes three sub-Agents, each responsible for a key O&M domain: optical channel management, performance optimization, and fault management. The function layer defines core capabilities required to fulfill each Sub-Agent’s responsibilities. is to reduce human involvement by enabling Agents to au-tonomously acquire network data and execute tasks, human operators still play an important role during the early stages of network automation. For example, optical channel add/drop op-erations are often driven by service-layer bandwidth demands. Since such demands may not yet be automatically communi-cated from the service side, or due to design choices to decouple IP and optical-layer intelligence, optical network engineers must manually specify channel-related operations to the Supervisor Agent. Furthermore, the Supervisor Agent is responsible for in-terpreting operator intent, decomposing tasks, and dispatching them to the appropriate sub-Agents. It also manages inter-Agent coordination when one Agent’s task requires collaboration from another. The Sub-Agent Layer consists of three dedicated sub-Agents responsible for optical channel management, performance opti-mization, and fault management. Sub-Agents can either operate continuously following predefined workflows or respond to spe-cific instructions issued by the Supervisor Agent. For security and control integrity, direct communication between sub-Agents is disallowed. Instead, coordination is exclusively handled by the Supervisor Agent. Each sub-Agent is responsible for defining its task boundaries, building dedicated workflows, and prepar-ing the tools necessary to carry out its assigned functions. The scope and complexity of each sub-Agent’s tasks should align with the current level of automation in the network, taking into account factors such as digital twin modeling fidelity and net-work data accessibility. The Functional Layer defines the essential capabilities re-quired by each sub-Agent to complete its designated tasks. For example, the fault management Agent must support core func-tions such as root cause identification and the issuance of repair instructions to field engineers. More advanced functions, such as fault prediction or anomaly detection, can be introduced progressively based on the network’s maturity in automation. Additionally, as optical equipment evolves (e.g., the deployment of new transceiver modules or board types), the capabilities of sub-Agents must also be updated to support new operational requirements. In summary, the proposed multi-Agent architecture estab-lishes two key design principles for the deployment of LLM-based AI Agents in optical network O&M scenarios: first, assign dedicated sub-Agents for each major O&M task category; sec-ond, implement a Supervisor Agent for unified coordination to ensure coherent and orderly automation. The proposed frame-work follows a centralized network management architecture, where the Supervisor Agent and sub-Agents are deployed close to the NMS servers to minimize data retrieval and command execution latency. In the following sections, we detail the design and implementation strategies for each of the three sub-Agents. 
+
+B. Agent for Optical Channel Management 
+
+In optical networks, the addition and deletion of optical channels generally arise from two scenarios: (1) changes in bandwidth demand between service nodes, and (2) wavelength re-routing that necessitates the reallocation of channels in certain OMS. The following discussion focuses on the first case, adding new optical channels to accommodate increased bandwidth requirements between two nodes, and presents the design methodology of the optical channel management sub-Agent. Since LLM-based Agents possess strong intent understand-ing and, when augmented with external tools and knowledge bases, can execute tasks efficiently, it is important to first map out the current best-practice workflow followed by human engi-neers. In a typical add-channel scenario, the process begins with identifying the two service nodes between which additional Research Article 8Optical channel adding request                                                                            
+
+> Identify service nodes
+> Step1
+> ：Best practice flow
+> for adding optical channels
+> Step2
+> ：
+> Determine workflow
+> Overall workflow
+> Step3
+> ：Determine the component details in the Agent
+> Tools included :
+> Prompt template (not only one template, here show one of them):
+> Role assignment :You are an expert in optical channel managemen t…
+> Goal -setting :Determine wavelength and route combinations that
+> meet bandwidth needs and pass QoT verification …
+> Expected output :A structured list of selected wavelength –route pairs
+> with associated QoT estimates and conflict status .The output format
+> should be in JSON format …
+> Caution :If resource availability is unclear, do not assume; request
+> verification from external systems …
+> Tool1: RWA API ,Tool2: QoT estimation based digital twin
+> Knowledge base for RAG:
+> Wavelength utilization map, Available fiber routes, Transponder threshol d
+> Model used:
+> Llama series, Deepseek series, Claude series…
+> Selected development framework:
+> LangChain
+> Step 4: Build the program
+> The overall architecture
+> and implementation of the
+> program are based on
+> LangChain
+> Prompt
+> template
+> Optical channel adding
+> Select tools
+> Tool1 ,Tool2
+> RAG
+> Knowledge base
+> Summarize the selected
+> route an dwavelength
+> Determine channel quantity
+> Select route and wavelength
+> Evaluate QoT
+> Configure devices during
+> ascheduled time window
+> Verify performance
+> Optimize performance
+> Transform
+> Demand confirmation
+> and resource selection
+> Task 1
+> Device configuration
+> deployment
+> Task 2
+> Performance validation
+> and optimization
+> Task 3
+> LLM
+> Task1
+
+Fig. 6. Implementation framework of the optical channel management Agent for bandwidth-driven wavelength provisioning. The figure illustrates the practical workflow from operator requests to optical channel deployment, including real-world practices, multi-step Agent workflow, modular prompt-tool-RAG design, and standardized Agent development based on LangChain. bandwidth is needed and determining the number of optical channels required. RWA algorithm is then used to select the appropriate routes and spectrum slots. To ensure that transmis-sion quality meets margin requirements, the selected spectrum paths must be validated using QoT estimation tools. Next, dur-ing a designated maintenance window, the network operator configures service boards and WSS modules to establish the new channels and verifies their performance. To minimize the risk of errors, these operations are usually atomized, with channels added in batches and optical power gradually tuned. If the resulting performance or power flatness is suboptimal, further performance optimization is needed, which will be detailed in the next section. Once the best-practice workflow is clarified, the next step is to translate it into an executable workflow for the Agent, as shown in Fig. 6. This automated workflow should mirror the manual process while segmenting tasks into manageable and logically grouped task nodes. In the channel addition scenario, the work-flow can be divided into three main task nodes: (1) demand confirmation and resource selection, (2) device configuration deployment, and (3) performance validation and optimization. Each node consists of multiple sub-steps such as information retrieval or algorithm invocation. These nodes are executed se-quentially, triggered either by the completion of the previous node or by explicit commands from the Supervisor Agent. For example, while demand confirmation can be executed anytime, device configuration must wait until an authorized maintenance window. The granularity of task nodes should remain flexi-ble based on network complexity, tool maturity, and other con-straints. The core principle is to maintain tight cohesion within each node while keeping the complexity manageable. The next critical step before Agent implementation is the preparation of prompt templates for each task node, the selec-tion of necessary tools and external knowledge bases, and the identification of suitable LLMs and development frameworks. We now take the first task node, demand confirmation and re-source selection, as an example to explain this process. When additional channels are required, the operator pro-vides input to the Supervisor Agent using natural language. The Supervisor Agent interprets the request and passes key in-formation to the optical channel management sub-Agent. This sub-Agent must extract relevant details such as node names and the number of required channels for use in subsequent rout-ing and wavelength selection. For this purpose, two separate prompt templates can be created: one for demand confirmation and one for resource selection. In both cases, the LLM should be assigned the role of an optical channel management expert (e.g., "You are an expert in optical network channel management") to activate domain-specific knowledge and enhance understanding of technical terms and procedures. In the demand confirmation prompt, the goal is to extract the service nodes and the required number of channels from the Supervisor Agent’s message and output them in a standardized format. This step does not require external tools or RAG, as it relies entirely on the LLM’s text processing capability. The output is then passed as input to the resource selection step. In the resource selection prompt, the role remains the same, but the goal shifts to identifying available spectrum and routing options. The prompt should include example output formats and instructions to flag uncertainties, minimizing the risk of hal-lucination. This step typically requires the invocation of an RWA algorithm to identify non-conflicting slots and paths, and the use of a DT interface to evaluate QoT for the selected spectrum to en-sure minimal impact on existing channels. The knowledge base should include detailed information on wavelength usage, fiber routing lengths and health scores, as well as the OSNR thresh-olds required by OTUs under different modulation formats. Overall, this task node relies on the LLM’s ability to process textual inputs and analyze the results from RWA and DT tools, requiring a relatively strong general-purpose LLM. The final model choice should depend on factors such as network scale, service complexity, and empirical performance. LangChain is a recommended development framework for implementing multi-step workflows in a modular fashion. LangChain provides an Research Article 9
+
+abstraction layer for tool invocation. Within LangChain, the LLM automatically generates a structured call (e.g., a JSON ob-ject) following the predefined schema of available tools. The execution layer, rather than the LLM itself, runs the correspond-ing Python function or API, and the result is then automatically returned to the LLM for further planning and synthesis. A                                                                                                          
+
+> B
+> CD
+> E
+> 5nodes topology
+> {
+> "request" :{
+> "source" :"A",
+> "destination" :"C",
+> "requested_channels ":4,
+> "description" :"Add 4channels between Aand C"
+> },
+> "assigned_routes ":[
+> {
+> "path" :[
+> "A",
+> "B",
+> "C"
+> ],
+> "total_distance_km ":106 .0,
+> "path_stability ":80 .0,
+> "selection_note ":"selected because it has the
+> shortest total distance, and among ties, the best stability .",
+> "assigned_frequencies ":[
+> {
+> "index" :33 ,
+> "frequency_THz ":193 .0,
+> "slot_width_GHz ":50 .0
+> },
+> {
+> "index" :34 ,
+> "frequency_THz ":193 .05 ,
+> "slot_width_GHz ":50 .0
+> },
+> {
+> "index" :35 ,
+> "frequency_THz ":193 .1,
+> "slot_width_GHz ":50 .0
+> },
+> {
+> "index" :36 ,
+> "frequency_THz ":193 .15 ,
+> "slot_width_GHz ":50 .0
+> }
+> ]
+> }
+> ],
+> "quality_checks ":[
+> {
+> "frequency_index ":33 ,
+> "Calculate_GSNR_dB ":30 ,
+> "required_gsnr_db ":25 ,
+> "pass" :true
+> },
+> {
+> "frequency_index ":34 ,
+> "Calculate_GSNR_dB ":29 ,
+> "required_gsnr_db ":25 ,
+> "pass" :true
+> },
+> {" frequency_index ":35 ,
+> "Calculate_GSNR_dB ":28 .5,
+> "required_gsnr_db ":25 ,
+> "pass" :true
+> },
+> {
+> "frequency_index ":36 ,
+> "Calculate_GSNR_dB ":31 ,
+> "required_gsnr_db ":25 ,
+> "pass" :true
+> }
+> ],
+> "notes" :[
+> "all GSNR margins of the 4wavelength(s)
+> >3dB (based on 25 dB threshold) ."
+> ],
+> "result_summary ":{
+> "source" :"A",
+> "destination" :"C",
+> "requested_channels ":4,
+> "assigned_frequency_count ":4,
+> "success" :true
+> }
+> }
+> {
+> "role" :”operator",
+> ”request" :"Add 4channels between Aand C"
+> }
+> Operator request
+> Selected route after RWA invocation
+> Considering fiber length
+> and health scor e
+> Selected idle channels
+> GSNR margin verification
+> through QoT estimation
+> Agent output
+
+Fig. 7. Five nodes topology and illustrative validation results for demand confirmation and resource selection. We conducted an illustrative validation of the demand con-firmation and resource selection subtasks shown in Fig. 6 using LangChain 0.2.16 and DeepSeek-V3.2-Exp. The constructed net-work topology, consisting of five nodes, is shown in Fig. 7. When a user requests to add four new channels between nodes A and C, the LLM invokes the RWA tool. In this process, we primarily consider three metrics: fiber routing latency, link stability score, and the number of available channels. The LLM evaluates all candidate fiber paths that satisfy the channel requirement and selects the optimal route A–B–C based on a composite score. For wavelength selection, the available idle channels are assigned sequentially, after which the QoT estimation tool is invoked to verify that the GSNR margins of the four channels on the A–B–C path all meet the required thresholds, thereby confirming this path as the final solution. After route and spectrum selection is complete, the next task node—device configuration—must wait for the designated main-tenance window and be triggered by the Supervisor Agent. The remaining two task nodes (device configuration deployment and performance validation/optimization) could follow a simi-lar design pattern as the first, with careful tailoring of prompt templates, tools, and LLM models. Each node’s design should reflect its specific requirements for network performance and state data, while model selection must strike a balance between reasoning accuracy and computational cost. It should be noted that subsequent tasks often involve live network configuration adjustments and the integration of var-ious data and notification platforms, leading to higher task complexity and operational risk. To ensure accurate decision-making by the LLM, the prompt template should typically be up-graded from Standard Prompting to Chain-of-Thought Prompt-ing. Moreover, the choice between Zero-Shot-CoT and Few-Shot-CoT should depend on network scale, task complexity, and empirical performance. Additionally, the workflows for optical channel addition and deletion can be designed as parallel, independent pipelines, each with its own task nodes. This modular approach simplifies Agent implementation and improves maintainability. 
+
+C. Agent for Performance Optimization 
+
+In optical networks, transmission quality fluctuations and degra-dation of inter-channel performance consistency frequently oc-cur due to factors such as fiber degradation, equipment aging, and wavelength channel additions or deletions. To ensure net-work stability and reliability, timely performance optimization is essential. Among the various optimization goals, power flatness is the most commonly targeted, as engineers can directly monitor channel power through optical channel monitors (OCMs) and use it as feedback for adjustment. This makes implementation relatively feasible. However, when power flatness optimization is performed manually, it typically requires tuning each OMS in-dividually, which is time-consuming and prone to configuration errors. From a higher-level perspective, optimizing for both flat and maximized GSNR can bring the network’s transmission capacity close to its theoretical maximum. Under the condition of an accurate digital twin, optimal configurations can be identified through parameter tuning. The following section focuses on the task of power flatness optimization and outlines the design process for the performance optimization Agent. The first step is to extract best practices from current human-in-the-loop power flatness optimization processes. When power flatness in a specific OMS falls below a defined threshold, net-work operators are notified either through routine inspections or via alarms proactively reported by devices equipped with OCMs. Operators then locate the affected OMS segment based on alarm information. Since power flatness tuning involves adjusting the VOAs on WSS and the gain of optical amplifiers, it is considered a high-risk configuration change. Thus, it must be executed within authorized maintenance windows. In practice, engineers be-gin from the transmitting side of the OMS, fine-tuning VOAs incrementally and observing power flatness changes via OCM feedback in a closed-loop iterative manner. If a wavelength re-mains underpowered even when its VOA is set to the minimum, the OA gain needs to be increased while VOAs of other channels are slightly raised to maintain balance. Once an OMS segment is optimized, downstream segments must be checked for per-formance impacts. If flatness degrades beyond tolerable limits, further optimization is required downstream. To ensure operational safety and effectiveness, a digital twin system can be used to simulate and preview configuration changes. This requires the digital twin to support fast updates and real-time interaction so that it can reflect the effect of each optimization step and guide the next. The optimization task is only considered complete once all affected OMS segments are adjusted and verified. Based on the above, the performance optimization Agent’s workflow can be divided into two key tasks: (1) identifying the OMS segments that require optimization and verifying power flatness, and (2) executing the tuning process during the opera-tional time window, as shown in Fig. 8. Research Article 10 Detect power flatness degradation 
+
+Step1 
+
+：Best practice flow for 
+
+performance optimization 
+
+> Step2
+
+：
+
+> Determine workflow
+
+Overall workflow 
+
+> Step3
+
+：Determine the component details in the Agent                                                  
+
+> Tools included :
+> Role assignment :You are an expert in optical transport network
+> maintenance, specializing in power flatness analysis and optimization …
+> Goal -setting :Determine whether any OMS in the current network
+> exhibits power flatness degradation beyond the acceptable
+> threshold, and identify those segments …
+> Expected output :A list of OMS segments with power flatness values,
+> each compared to the predefined threshold, and identification of those
+> requiring optimization. …
+> Caution :Do not infer OMS degradation without valid OCM data; if
+> information is missing or unclear, request additional input from the
+> supervisor agent …
+> Tool1: OCM Data API ,Tool2: Topology & Service Mapping API
+> Knowledge base for RAG:
+> No external knowledge base needed for this task
+> Model used:
+> Llama series, Deepseek series, Claude series…
+> Selected development framework:
+> LangChain
+> Step 4: Build the program
+> The overall architecture
+> and implementation of the
+> program are based on
+> LangChain
+> Prompt
+> template
+> Optical power flatness
+> optimization command
+> Select tools
+> Task1
+> Obtain the identified OMS
+> and summarize it
+> Locate target OMS
+> Validate degradation via OCM
+> Pre -simulation via digital twin
+> Stepwise adjustment of
+> WSS &OA
+> Dynamic optimization across
+> OMS
+> Validation final power flatness
+> Transform
+> Identify and verify
+> OMS for optimization
+> Task 1
+> Execute optimization
+> within maintenance
+> time window
+> Task 2
+> LLM
+> Tool1 ,Tool2
+> Select tools
+
+Fig. 8. Design and construction of the optical network performance optimization Agent for optical power flatness enhancement. The diagram presents the expert workflow for identifying and tuning OMS segments, along with corresponding task breakdowns, tool interfaces, prompt design, and Agent orchestration mechanisms. 1278 -OTM -OTU                                           
+
+> 1279 -OTM -OTU
+> 1280 -OTM -OTU 1281 -OTM -MUX/BA 1282 -ILA 1283 -ILA 1284 -DGE 1285 -ILA 1286 -ILA 1287 -ILA 1289 -OTM -MUX /PA
+> 1290 -OTM -OTU
+> 1291 -OTM -OTU
+> 1292 -OTM -OTU
+> {
+> "role" :"notifier",
+> "notification" :"1284 -DGE, 1289 -OTM -MUX/PA power flatness degradation notification"
+> }
+> {
+> “identification” :“After verifying the OCM data, the power flatness metrics of 1284 -DGE and 1289 -OTM -MUX/PA are 3.6dB and 3.2dB, respectively .The corresponding OMS
+> sections need power flatness optimization ."
+> }
+
+Power flatness degradation notification 
+
+Power flatness degradation identification Invoke the OCM query tool to check power flatnes s
+
+Fig. 9. Constructed multi-span transmission link and illustrative validation results for identifying OMS segments requiring power flatness optimizations. This task may be delegated by the Supervisor Agent or initi-ated independently by the performance optimization Agent, as-suming the latter has a built-in power flatness inspection mecha-nism. Taking the latter case as an example, the first task involves several specific design elements. In the prompt template, the Agent should be assigned the role of a "power flatness opti-mization expert," and the value of the task and the method for calculating flatness should be clearly stated. The goal is to iden-tify OMS segments with sub-threshold flatness and output the flatness values. To prevent hallucinations, the prompt should also instruct the LLM to avoid speculating on uncertain inputs. The tools required for this task include interfaces to access OCM scan data across the network. With the obtained power spectrum, flatness can be easily computed by finding the differ-ence between the maximum and minimum power values across channels, and compared against the predefined threshold. Addi-tionally, the Agent may be equipped with APIs to query network topology and service connectivity, enabling spatial correlation analysis among affected OMS segments and identifying related service paths. Typically, this task does not require an external knowledge base. As the task primarily involves querying and logical reasoning, a lightweight LLM may be selected, based on test results. LangChain or other mainstream frameworks can be used to implement the Agent. An illustrative validation result for the subtask of identifying OMS segments requiring power flatness optimization is pre-sented in Fig. 9. A two-OMS multi-span transmission system was constructed. When the 1284-DGE and 1289-OTM-MUX/BA Agents reported flatness degradation, the LLM automatically obtained OCM measurement data from both sites via API access and, based on the actual flatness values, correctly identified the segments that required power flatness optimization. For the second task of executing power flatness tuning, the overall workflow follows a similar design. However, special attention must be given to ensuring the safe execution of con-figuration changes. Through appropriate prompt design and digital twin API integration, the Agent should be capable of simulating the impact of adjusting WSS and OA parameters. Furthermore, it must adapt dynamically based on real-time net-work feedback after configuration commands are issued. This capability is critical to ensure network reliability throughout the tuning process. 
+
+D. Agent for Optical Network Fault Management 
+
+When introducing LLM-based AI Agents for optical network fault management, one of the primary objectives is to effectively Research Article 11 Alar m triggering and reportin g   
+
+> Operator receives
+> and views alarms
+> Step1
+
+：Best practice flow                                                                       
+
+> for fault localizatio n
+> Step2
+> ：
+> Determine workflow
+> Overall workflow
+> Step3
+> ：Determine the component details in the Agent
+> Tools included :
+> Role assignment :You are an expert in optical network alarm handling.
+> You specialize in identifying key fault indicators from alarm messages and
+> generating structured fault summaries …
+> Goal -setting :Summarize the basic information of the fault from the
+> raw alarms, including fault type, severity, time of occurrence, and
+> affected elements …
+> Expected output :A structured summary in JSON format containing fields
+> such as fault_type ,severity_level ,timestamp, affected_component ,and
+> alarm_source …
+> Caution :Avoid inferring any information that is not explicitly present in the
+> alarms. If the required detail is uncertain, escalate to the supervisor agent …
+> Tool1: Alarm Query API ,Tool2: Alarm Compression /Correlation Tool
+> Knowledge base for RAG:
+> Optical network alarm handling manual ,Standard Fault Typology and
+> Classification Guide, Operator -Specific Alarm Parsing Rules
+> Model used:
+> Llama series, Deepseek series, Claude series…
+> Selected development framework:
+> LangChain
+> Step 4: Build the program
+> The overall architecture
+> and implementation of the
+> program are based on
+> LangChain
+> Prompt
+> template
+> Alarm trigger
+> Select tools
+> Tool1 ,Tool2
+> RAG
+> Knowledge base
+> Summarize the fault
+> information
+> Preliminary fault analysis
+> and type identification
+> Root cause localization using
+> alarm correlation/compression
+> Querying performance and
+> status data for further
+> confirmation
+> Preparation for field repair of
+> config adjustment
+> Transform
+> Extract fault summary
+> information
+> Task 1
+> Root cause analysis
+> via alarm correlation
+> Task 2
+> Confirm fault details
+> via performance data
+> Task 3
+> LLM
+> Task1
+
+Fig. 10. Construction workflow of the fault management Agent for root cause localization. The figure outlines the operational best practices in live networks, maps them into an Agent-executable workflow, and provides detailed component design and develop-ment methodology for alarm parsing and fault analysis. manage the most frequent and impactful fault categories, namely fiber-related issues such as fiber cuts, jitter, and degradation, as well as equipment faults including board and module failures. In practice, fault management encompasses multiple distinct yet interrelated tasks, including fault prediction, anomaly detec-tion, root cause localization, and recovery. Since these tasks are generally independent in time, a fault management Agent must support parallel workflows to handle them concurrently. This section focuses on the Agent design for fault localization, which remains central to the overall fault management process. In current operational workflows, fault localization relies heavily on analyzing alarms and performance degradation symptoms. When a fault occurs, optical devices generate and report alarms based on predefined rules. For example, a fiber cut will typically trigger LOS-type alarms such as POWER_LOS and OSC_LOS at downstream optical layer boards, while service boards may report alarms like R_LOS to indicate service loss. These alarms are aggregated and visualized through the NMS interface, forming the entry point for fault analysis. Network en-gineers then analyze the alarm patterns using predefined alarm correlations and device roles to determine the fault type, identify the affected subnet, and ideally pinpoint the specific fiber span, board, or module responsible for the fault. Alarm compression algorithms may also be used to accelerate the diagnostic process. Once the fault scope is narrowed, engineers consult historical performance metrics, such as received optical power levels, to assess the extent of fiber degradation and determine appropriate corrective actions, such as adjusting optical gain or initiating physical inspection. The sequence of alarm reception, analysis, and verification is largely consistent across both fiber and equipment fault sce-narios, providing a dependable foundation for designing an LLM-based Agent workflow. For fault localization, the work-flow can be logically organized into three main phases: (1) initial extraction of fault information, (2) root cause inference based on alarms, and (3) verification using real-time or historical perfor-mance and status information, as shown in Fig. 10. Although these steps are often blended in manual troubleshooting, explicit separation into structured task stages is essential for automated execution by an Agent. In the first phase, the Agent processes incoming alarm data to extract high-level fault descriptors such as event timestamp, severity, and affected network domains. While often implicit in manual workflows, this stage is critical for triggering the subsequent steps in the Agent pipeline. The second phase in-volves causal analysis over alarm patterns, exploiting spatial and temporal correlations to infer root causes. Finally, the third phase gathers relevant device metrics to confirm or refine the diagnosis, ensuring sufficient evidence before recommending actions. Each phase can be supported by tailored prompts and exter-nal tools. For instance, in the first phase, a well-designed prompt can instruct the LLM to act as an "optical network alarm analysis expert," with a clearly defined goal: extract fault descriptors in a structured format from raw alarm logs. To ensure consistency and minimize hallucination risk, the prompt should specify out-put templates and handling strategies for uncertain or missing information. Tool-wise, the Agent may rely on alarm query APIs, log parsers, or alarm correlation engines. Knowledge retrieval can be enhanced via RAG by supplying fault type handbooks and rule-based classification guides as external resources. Given the moderate complexity of this step, a lightweight LLM is gen-erally sufficient and can be efficiently deployed using Agent orchestration frameworks such as LangChain. For the fault management scenario, an illustrative validation of root cause analysis was conducted using the transmission system shown in Fig. 9. A fiber break was simulated between the 1283-ILA and 1284-DGE nodes, resulting in MUT_LOS and OSC_LOS alarms reported by 1284-DGE, as well as an R_LOS alarm reported by 1289-OTM-MUX/PA. After extracting key information such as alarm names, severity, sources, and times-tamps, the LLM invoked the fault root cause analysis tool and successfully identified the fiber break as the root cause. Further-more, since a troubleshooting handbook was provided, the LLM Research Article 12  
+
+> Fig. 11.
+
+Illustrative validation results of root cause analysis based on alarm information. was also able to generate appropriate fault resolution sugges-tions, as shown in Fig. 11. Subsequent stages, particularly root cause analysis and performance-based confirmation, require the Agent to interpret network topology, understand service mappings, and incorpo-rate historical behavior patterns. Tools for topology traversal, configuration inspection, and time-series metric analysis become essential here. With a multi-modal data processing pipeline and access to rich monitoring interfaces, the fault localization Agent can reproduce the diagnostic logic of expert engineers, achieving both efficiency and accuracy in high-volume environments. Other fault management tasks, such as proactive fault pre-diction and real-time anomaly detection, can be developed fol-lowing similar design principles. For each task, the Agent’s workflow should be aligned with operational best practices, clearly scoped into manageable task nodes, and supported by appropriate prompts, tools, and domain-specific resources. As automation matures within optical networks, fault management Agents can be progressively expanded in capability and preci-sion, laying a robust foundation for intelligent, self-sustaining network operations. 
+
+5. CHALLENGES 
+
+Although the proposed multi-Agent collaborative O&M architec-ture is designed with consideration of practical network condi-tions and addresses multiple categories of tasks with executable workflows, the deployment of LLM-based AI Agents in real-world optical networks still faces several key challenges. 
+
+> A. Real-time Data Access
+
+The first challenge lies in the real-time acquisition of operational data from live optical networks. In most high-value O&M sce-narios, higher-level automation depends on continuous and timely awareness of network performance and state information. For example, when performing optical power equalization in large-scale systems, parameter adjustments in one optical multi-plex section (OMS) often introduce cascading effects on multiple downstream OMS segments. To ensure operational safety, each adjustment must be applied in small steps and verified through pre-simulation using a digital twin. However, the efficiency of such simulations is largely constrained by the data acquisition rate—if network data cannot be retrieved in real time, the overall optimization loop becomes significantly slower. Similarly, in fault prediction tasks, fine-grained operational data at the millisecond level are essential for capturing early anomaly patterns. Yet, most optical networks currently de-ployed by operators still rely on historical data with coarse time granularity (typically every 15 minutes), which cannot meet the real-time requirements. Moreover, frequent high-rate API requests to collect real-time data may cause device response delays or even impact network stability. To align with an LLM-driven O&M architecture, the data-pushing mechanisms of optical network elements must be fur-ther optimized. In addition, the appropriate preprocessing strate-gies for different types of raw monitoring data before they are fed to the LLM remain an open research topic, as these directly affect the model’s analytical accuracy and task execution effi-ciency. Overall, enhancing the real-time data acquisition and preprocessing pipeline is a prerequisite for enabling higher lev-els of automation in optical network operations. 
+
+> B. Digital Twin Modeling Capabilities
+
+The second challenge lies in building high-fidelity digital twins for large-scale optical networks. Digital twins have become a fundamental enabler for key O&M scenarios such as operation rehearsal, performance evaluation, and fault prediction. Their modeling accuracy and computational efficiency directly deter-mine the practical boundary of applying LLMs for intelligent optical network management. However, in current O&M practices, the precision and scal-ability of digital twin models are still limited by several fac-tors, including inaccurate fiber parameters, insufficient amplifier modeling fidelity, and the inherent complexity of large-scale net-work topologies and service paths. Consequently, there remains a noticeable gap between simulation accuracy and deployment efficiency. To bridge this gap, further advancements are needed in several directions, such as physical parameter calibration, parallel simulation scheduling, and data-driven model construc-tion. In addition, most existing academic and industrial efforts have focused primarily on digital twins at the physical layer of optical transmission systems, while the modeling of higher-layer network properties—such as network capacity, latency, and service-level agreement (SLA) requirements—remains un-derdeveloped. Therefore, achieving high-fidelity, multi-layer digital twins continues to be an open challenge and is essential for providing reliable support to LLM-driven autonomous O&M in optical networks. 
+
+> C. LLM Reliability
+
+The third challenge concerns the reliability and safety of LLMs when applied to optical network O&M. As the foundational infrastructure supporting upper-layer services, optical networks require extremely high stability and operational accuracy. Intro-ducing LLMs into such environments therefore raises a critical question: how to ensure that the model’s analyses and decisions Research Article 13 
+
+are logically sound and will not induce unintended network disruptions. At the current stage of development, hallucination remains an inherent limitation of LLMs, and fully eliminating it is not yet feasible. Existing studies show that techniques such as CoT prompting and RAG can mitigate hallucinations to some ex-tent, especially when handling complex tasks or domain-specific reasoning. However, their effectiveness is domain-dependent, and no comprehensive methodology has been established to guarantee hallucination-free behavior. To prevent unreliable model outputs from posing operational risks to live networks, additional safeguard mechanisms must be incorporated between the LLM’s decision and the actual execution actions. For example, before applying configuration changes to network devices, the proposed framework requires that each action be pre-validated through a digital twin to ensure that the impact remains within acceptable bounds. Furthermore, for high-risk operations, a mandatory human approval step should be enforced to maintain strict control over operational safety. Overall, the reliability and safety of LLM-driven decisions must be carefully addressed to prevent inappropriate actions or hallucinated outputs from affecting service stability in optical networks. 
+
+6. CONCLUSIONS 
+
+This paper starts from the practical needs of optical network operations and systematically examines the potential and ap-plicable scenarios of LLMs for enhancing intelligent network management. A general multi-Agent collaborative architecture is proposed, in which a Supervisor Agent orchestrates task de-composition and the coordination of sub-Agents. By integrating prompt engineering, tool invocation, and workflow design, the architecture delivers Agent-based solutions for key tasks such as channel provisioning, performance optimization, and fault man-agement. Furthermore, this paper discuss the key challenges faced in deploying LLMs in real-world networks, particularly in terms of real-time data access, DT modeling capabilities, and model reliability. Future work will focus on validating the pro-posed framework through phased deployment in operational networks, and further exploring its integration with existing NMS and SDN controller to enable seamless orchestration. Over-all, this work provides a conceptual framework for applying LLMs to optical networks and lays the foundation for building a closed-loop, autonomous, and intelligent O&M system at scale. 
+
+FUNDING 
+
+National Natural Science Foundation of China (U24B20133, 62522104). 
+
+REFERENCES 
+
+1. T. Tanaka, A. Hirano, S. Kobayashi, T. Oda, S. Kuwabara, A. Lord, P. Gunning, O. González de Dios, V. Lopez, A. M. Lopez de Lerma 
+
+et al. , “Autonomous network diagnosis from the carrier perspective,” J. Opt. Commun. Netw. 12 , A9–A17 (2020). 2. T. Tanaka, T. Inui, S. Kawai, S. Kuwabara, and H. Nishizawa, “Mon-itoring and diagnostic technologies usingdeep neural networks for predictive optical network maintenance,” J. Opt. Commun. Netw. 13 ,E13–E22 (2021). 3. F. Musumeci, C. Rottondi, A. Nag, I. Macaluso, D. Zibar, M. Ruffini, and M. Tornatore, “An overview on application of machine learning techniques in optical networks,” IEEE Commun. Surv. & Tutorials 21 ,1383–1408 (2018). 4. F. N. Khan, Q. Fan, C. Lu, and A. P. T. Lau, “An optical communication’s perspective on machine learning and its applications,” J. Light. Technol. 
+
+37 , 493–516 (2019). 5. D. Wang, C. Zhang, W. Chen, H. Yang, M. Zhang, and A. P. T. Lau, “A review of machine learning-based failure management in optical networks,” Sci. China Inf. Sci. 65 , 211302 (2022). 6. F. Musumeci and M. Tornatore, “Failure management in optical net-works with ml: a tutorial on applications, challenges, and pitfalls,” J. Opt. Commun. Netw. 17 , C144–C155 (2025). 7. D. Wang, Y. Wang, X. Jiang, Y. Zhang, Y. Pang, and M. Zhang, “When large language models meet optical networks: paving the way for automation,” Electronics. 13 , 2529 (2024). 8. C. Sun, X. Yang, N. Di Cicco, R. Ayassi, V. Virajit Garbhapu, P. A. Stavrou, M. Tornatore, G. Charlet, and Y. Pointurier, “Experimental demonstration of local ai-agents for lifecycle management and control automation of optical networks,” J. Opt. Commun. Netw. 17 , C82–C92 (2025). 9. X. Liu, Q. Qiu, Y. Zhang, Y. Cheng, L. Yi, W. Hu, and Q. Zhuge, “First field trial of llm-powered ai agent for lifecycle management of autonomous driving optical networks,” in Optical Fiber Communication Conference, (Optica Publishing Group, 2025), pp. Th1A–2. 10. C. Sun, X. Yang, N. Di Cicco, R. Ayassi, V. Virajit Garbhapu, P. A. Stavrou, M. Tornatore, G. Charlet, Y. Pointurier et al. , “First experi-mental demonstration of full lifecycle automation of optical network through fine-tuned llm and digital twin,” in 2024 European Conference on Optical Communications (ECOC), (2024), pp. 1–3. 11. C. Sun, R. Ayassi, X. Yang, G. Charlet, P. A. Stavrou, and Y. Pointurier, “Demonstration of llm-based ai-agent for optical network management and automation,” in ECOC 2024; 50th European Conference on Optical Communication, (VDE, 2024), pp. 248–248. 12. N. Di Cicco, M. Ibrahimi, S. Troia, F. Musumeci, and M. Tornatore, “Open implementation of a large language model pipeline for automated configuration of software-defined optical networks,” in 50th European Conference on Optical Communication (ECOC), (2024). 13. Y. Song, Y. Zhang, A. Zhou, Y. Shi, S. Shen, X. Tang, J. Li, M. Zhang, and D. Wang, “Synergistic interplay of large language model and digital twin for autonomous optical networks: Field demonstrations,” IEEE Commun. Mag. (2025). 14. Y. Zhang, M. Zhang, Y. Song, X. Jiang, Y. Wang, S. Shen, and D. Wang, “Gpt-enabled digital twin assistant for multi-task cooperative manage-ment in autonomous optical network,” in Optical Fiber Communication Conference, (Optica Publishing Group, 2024), pp. Th1G–4. 15. Y. Zhang, Y. Song, S. Li, Y. Shi, S. Shen, X. Tang, M. Zhang, and D. Wang, “Generative ai-driven hierarchical multi-agent framework for zero-touch optical networks,” IEEE Commun. Mag. (2025). 16. Y. Zhang, Y. Song, Y. Pang, S. Li, X. Jiang, Y. Wang, J. Li, M. Zhang, and D. Wang, “Design and evaluation of an llm-based agent for qot estimation and performance optimization in optical networks,” IEEE Open J. Commun. Soc. (2025). 17. Y. Wang, J. Li, Y. Pang, Y. Song, L. Zhang, M. Zhang, and D. Wang, “Alarmgpt: an intelligent operation assistant for optical network alarm analysis using chatgpt,” in 49th European Conference on Optical Com-munications (ECOC 2023), vol. 2023 (IET, 2023), pp. 1330–1333. 18. Y. Wang, C. Zhang, J. Li, Y. Pang, L. Zhang, M. Zhang, and D. Wang, “Alarmgpt: an intelligent alarm analyzer for optical networks using a generative pre-trained transformer,” J. Opt. Commun. Netw. 16 , 681– 694 (2024). 19. Y. Pang, M. Zhang, Y. Liu, X. Li, Y. Wang, Y. Huan, Z. Liu, J. Li, and D. Wang, “Large language model-based optical network log analysis using llama2 with instruction tuning,” J. Opt. Commun. Netw. 16 , 1116– 1132 (2024). 20. X. Jiang, M. Zhang, Y. Song, Y. Zhang, Y. Wang, C. Ju, and D. Wang, “Opticomm-gpt: a gpt-based versatile research assistant for optical fiber communication systems,” Opt. Express 32 , 20776–20796 (2024). 21. C. Wang, N. Yoshikane, C. Zhang, Y. Wakayama, D. Soma, and T. Tsuri-tani, “Llm-centric transport network configuration management frame-Research Article 14 
+
+work and demonstration,” in Optical Fiber Communication Conference, 
+
+(Optica Publishing Group, 2025), pp. M3A–4. 22. C. Wang, Y. Wakayama, N. Yoshikane, and T. Tsuritani, “Llm-enabled full-stack configuration automation of sdm transport network,” in ECOC 2024; 50th European Conference on Optical Communication, (VDE, 2024), pp. 1599–1602. 23. A. Zhou, Y. Song, Y. Zhang, M. Zhang, and D. Wang, “Large language model-driven ai agent in sdn controller towards intent-based manage-ment of optical networks,” in ECOC 2024; 50th European Conference on Optical Communication, (VDE, 2024), pp. 1595–1598. 24. H. Zaid, P. Safari, B. Shariati, A. Jafari, M. Balanici, and J. K. Fischer, “Multi-agent design for llm-assisted network management,” in Optical Fiber Communication Conference, (Optica Publishing Group, 2025), pp. W1A–4. 25. Y. Song et al. , “Lifecycle management of optical networks with dynamic-updating digital twin: a hybrid data-driven and physics-informed ap-proach,” IEEE J. on Sel. Areas Commun. (2025). 26. R. Martínez, J. M. Fàbrega, R. Casellas, R. Vilalta, R. Muñoz, H. Yu, Y. Wang, M. Hemmati, C. Janz, H. Li et al. , “Autonomous closed-loop operations to ensure qot connections in sdn-controlled elastic optical networks,” in Optical Fiber Communication Conference, (Optica Publishing Group, 2025), pp. M1J–7. 27. C. Manso, R. Muñoz, N. Yoshikane, R. Casellas, R. Vilalta, R. Martínez, T. Tsuritani, and I. Morita, “Tapi-enabled sdn control for partially dis-aggregated multi-domain (ols) and multi-layer (wdm over sdm) optical networks,” J. Opt. Commun. Netw. 13 , A21–A33 (2021). 28. A. Giorgetti, A. Sgambelluri, R. Casellas, R. Morro, A. Campanella, and P. Castoldi, “Control of open and disaggregated transport networks using the open network operating system (onos),” J. Opt. Commun. Netw. 12 , A171–A181 (2020). 29. C. Miao, M. Chen, A. Gupta, Z. Meng, L. Ye, J. Xiao, J. Chen, Z. He, X. Luo, J. Wang et al. , “Detecting ephemeral optical events with 
+
+{OpTel },” in 19th USENIX Symposium on Networked Systems Design and Implementation (NSDI 22), (2022), pp. 339–353. 30. C. Xie, L. Wang, L. Dou, M. Xia, S. Chen, H. Zhang, Z. Sun, and J. Cheng, “Open and disaggregated optical transport networks for data center interconnects,” J. Opt. Commun. Netw. 12 , C12–C22 (2020). 31. E. Le Rouzic, O. Renais, J. Meuric, T. Marcot, C. Betoule, G. Thouenon, A. Triki, M. Laye, N. Pelloquin, Y. Lagadec et al. , “Operator view on optical transport network automation in a multi-vendor context,” J. Opt. Commun. Netw. 14 , C11–C22 (2022). 32. D. Wang, Y. Song, Y. Zhang, X. Jiang, J. Dong, F. N. Khan, T. Sasai, S. Huang, A. P. T. Lau, M. Tornatore et al. , “Digital twin of optical networks: a review of recent advances and future trends,” J. Light. Technol. (2024). 33. Q. Zhuge, X. Liu, Y. Zhang, M. Cai, Y. Liu, Q. Qiu, X. Zhong, J. Wu, R. Gao, L. Yi et al. , “Building a digital twin for intelligent optical net-works,” J. Opt. Commun. Netw. 15 , C242–C262 (2023). 34. Y. Wang, Y. Pang, Y. Liu, Y. Zhang, L. Zhang, M. Zhang, and D. Wang, “Graph structure-enhanced large language model for optical network fault diagnosis: an explainable alarm root cause localization approach,” IEEE Internet Things J. (2025). 35. L. Li, Y. Zhang, and L. Chen, “Prompt distillation for efficient llm-based recommendation,” in Proceedings of the 32nd ACM International Con-ference on Information and Knowledge Management, (2023), pp. 1348– 1357. 36. L. Panait and S. Luke, “Cooperative multi-agent learning: The state of the art,” Auton. agents multi-agent systems 11 , 387–434 (2005). 37. B. Gunel, J. Du, A. Conneau, and V. Stoyanov, “Supervised contrastive learning for pre-trained language model fine-tuning,” arXiv preprint arXiv:2011.01403 (2020). 38. Z. Wang, B. Bi, S. K. Pentyala, K. Ramnath, S. Chaudhuri, S. Mehro-tra, X.-B. Mao, S. Asur et al. , “A comprehensive survey of llm align-ment techniques: Rlhf, rlaif, ppo, dpo and more,” arXiv preprint arXiv:2407.16216 (2024). 39. L. Trung, X. Zhang, Z. Jie, P. Sun, X. Jin, and H. Li, “Reft: Reasoning with reinforced fine-tuning,” in Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), (2024), pp. 7601–7614. 40. J. Achiam, S. Adler, S. Agarwal, L. Ahmad, I. Akkaya, F. L. Aleman, D. Almeida, J. Altenschmidt, S. Altman, S. Anadkat et al. , “Gpt-4 technical report,” arXiv preprint arXiv:2303.08774 (2023). 41. A. Liu, B. Feng, B. Xue, B. Wang, B. Wu, C. Lu, C. Zhao, C. Deng, C. Zhang, C. Ruan et al. , “Deepseek-v3 technical report,” arXiv preprint arXiv:2412.19437 (2024). 42. C. Jeong, “Generative ai service implementation using llm application architecture: based on rag model and langchain framework,” J. Intell. Inf. Syst. 29 , 129–164 (2023). 43. X. Huang, W. Liu, X. Chen, X. Wang, H. Wang, D. Lian, Y. Wang, R. Tang, and E. Chen, “Understanding the planning of llm agents: A survey,” arXiv preprint arXiv:2402.02716 (2024). 44. M. Grunde-McLaughlin, M. S. Lam, R. Krishna, D. Weld, and J. Heer, “Designing llm chains by adapting techniques from crowdsourcing work-flows,” ACM Transactions on Comput. Interact. (2023). 45. J. Wei, X. Wang, D. Schuurmans, M. Bosma, F. Xia, E. Chi, Q. V. Le, D. Zhou et al. , “Chain-of-thought prompting elicits reasoning in large language models,” Adv. neural information processing systems 35 ,24824–24837 (2022). 46. R. Aksitov, S. Miryoosefi, Z. Li, D. Li, S. Babayan, K. Kopparapu, Z. Fisher, R. Guo, S. Prakash, P. Srinivasan et al. , “Rest meets react: Self-improvement for multi-step reasoning llm agent,” arXiv preprint arXiv:2312.10003 (2023). 47. J. C. Digitale, J. N. Martin, and M. M. Glymour, “Tutorial on directed acyclic graphs,” J. Clin. Epidemiol. 142 , 264–267 (2022). 48. Z. Shen, “Llm with tools: A survey,” arXiv preprint arXiv:2409.18807 (2024). 49. K. Hatalis, D. Christou, J. Myers, S. Jones, K. Lambert, A. Amos-Binks, Z. Dannenhauer, and D. Dannenhauer, “Memory matters: The need to improve long-term memory in llm-agents,” in Proceedings of the AAAI Symposium Series, vol. 2 (2023), pp. 277–280.
