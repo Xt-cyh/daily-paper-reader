@@ -25,3 +25,48 @@ subscriptions:
     stage: A
     diff_threshold_pct: 15
   keyword_recall_mode: or
+  intent_profiles:
+    - tag: LLM RS
+      description: 查找LLM领域 agent、multi-agent、retrieval、world model等领域的论文
+      enabled: true
+      keywords:
+        - keyword: LLM agent
+          keyword_cn: 大语言模型智能体
+          query: Large Language Model based autonomous agents
+        - keyword: multi-agent system
+          keyword_cn: 多智能体系统
+          query: collaborative multi-agent systems using LLMs
+        - keyword: retrieval augmented generation
+          keyword_cn: 检索增强生成
+          query: RAG and retrieval mechanisms for LLMs
+        - keyword: world model
+          keyword_cn: 世界模型
+          query: world models and environment simulators in LLMs
+        - keyword: agentic workflow
+          keyword_cn: 智能体工作流
+          query: design patterns for agentic workflows and planning
+        - keyword: reasoning and planning
+          keyword_cn: 推理与规划
+          query: chain of thought and strategic planning in agents
+      intent_queries:
+        - query: recent advances in LLM agents and multi agent coordination
+          query_cn: LLM智能体与多智能体协作的最新进展
+          enabled: true
+          source: manual
+          note: ''
+        - query: state of the art retrieval augmented generation techniques
+          query_cn: 检索增强生成技术的现状
+          enabled: true
+          source: manual
+          note: ''
+        - query: integrating world models with large language models
+          query_cn: 将世界模型与大语言模型集成
+          enabled: true
+          source: manual
+          note: ''
+        - query: survey on autonomous agents and retrieval systems
+          query_cn: 自主智能体与检索系统的综述
+          enabled: true
+          source: manual
+          note: ''
+      updated_at: '2026-03-19T12:47:59.920Z'
